@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<meta charset="utf-8" /> 
+<title>WebSocket Test</title> 
+<script language="javascript" type="text/javascript"> 
+
+var wsUri = "ws://localhost:12686"; 
+var output; 
+var currentput; 
+
+function init() { 
+  output = document.getElementById("output"); 
+  currentput = document.getElementById("currentput"); 
+  testWebSocket(); 
+} 
+
+function testWebSocket() { 
+  websocket = new WebSocket(wsUri); 
+  websocket.onopen = function(evt) { onOpen(evt) }; 
+  websocket.onclose = function(evt) { onClose(evt) }; 
+  websocket.onmessage = function(evt) { onMessage(evt) }; 
+  websocket.onerror = function(evt) { onError(evt) }; 
+} 
+
+function onOpen(evt) { 
+  writeToScreen("CONNECTED"); 
+  //doSend("WebSocket rocks"); 
+} 
+
+function onClose(evt) { 
+  writeToScreen("DISCONNECTED"); 
+} 
+
+function onMessage(evt) { 
+	console.log(evt.data);
+  writeToScreen('<span style="color: blue;">echo: ' +
+  evt.data+'</span>'); 
+} 
+
+function onError(evt) { 
+  writeToScreen('<span style="color: red;">ERROR:</span> ' +
+  evt.data); 
+} 
+
+function doSend(message) { 
+  writeToScreen("SENT: " + message); 
+  websocket.send(message); 
+  // writeToScreen("Reponse: " + res);
+} 
+
+function writeToScreen(message) { 
+  var pre = document.createElement("p"); 
+  pre.style.wordWrap = "break-word"; 
+  pre.innerHTML = message; 
+  output.appendChild(pre); 
+  output.scrollTop = output.scrollHeight;
+} 
+
+window.addEventListener("load", init, false); 
+
+
+function sendText() { 
+  var text = document.getElementById("inputMsg").value;
+  doSend(text);
+  
+} 
+
+function startDial(str) { 
+  var phone = document.getElementById("phoneNo").value;
+  var da={
+      cmd: "cmdStartDial",
+      request: {
+        param:{
+          phoneNo: phone,
+          prefix: str
+        },
+        uri: "a=1&b=2&c=3&m=中华"
+      }
+   };
+  doSend(JSON.stringify(da));
+} 
+
+function stopDial() { 
+  var phone = document.getElementById("phoneNo").value;
+  var da={
+      cmd: "cmdStopDial",
+      request: {
+        param:{
+          phoneNo: phone
+        },
+        uri: "a=1&b=2&c=3&m=中华"
+      }
+   };
+  doSend(JSON.stringify(da));
+} 
+
+function resetCall() { 
+  var phone = document.getElementById("phoneNo").value;
+  var da={
+      cmd: "cmdResetCall",
+      request: {
+        param:{
+        },
+        uri: "a=1&b=2&c=3&m=中华"
+      }
+   };
+  doSend(JSON.stringify(da));
+} 
+
+function addCookie() { 
+  var cookie = document.getElementById("bms_cookie").value;
+  var da={
+      cmd: "cmdAddCookie",
+      request: {
+        param:{
+          value: cookie
+        },
+        uri: "a=1&b=2&c=3&m=中华"
+      }
+   };
+  doSend(JSON.stringify(da));
+} 
+
+function doPhone_(vi) { 
+  var checked = vi.checked;
+  var da={
+      cmd: "hangup",
+      request: {
+        param:{
+          value: checked
+        },
+        uri: "a=1&b=2&c=3&m=中华"
+      }
+   };
+  doSend(JSON.stringify(da));
+} 
+
+function doPhone(b) { 
+  var da={
+      cmd: "cmdDoPhone",
+      request: {
+        param:{
+          value: b
+        },
+        uri: "a=1&b=2&c=3&m=中华"
+      }
+   };
+  doSend(JSON.stringify(da));
+} 
+
+function doHook_(vi) { 
+  var checked = vi.checked;
+  var da={
+      cmd: "doHook",
+      request: {
+        param:{
+          value: checked
+        },
+        uri: "a=1&b=2&c=3&m=中华"
+      }
+   };
+  doSend(JSON.stringify(da));
+} 
+
+function doHook(b) { 
+  var da={
+      cmd: "cmdDoHook",
+      request: {
+        param:{
+          value: b
+        },
+        uri: "a=1&b=2&c=3&m=中华"
+      }
+   };
+  doSend(JSON.stringify(da));
+} 
+
+function refuseCallIn() { 
+  var da={
+      cmd: "cmdRefuseCallIn",
+      request: {
+        param:{
+        },
+        uri: "a=1&b=2&c=3&m=中华"
+      }
+   };
+  doSend(JSON.stringify(da));
+  
+} 
+
+</script> 
+
+WebSocket Test
+<br>
+发送文本: <input type="text" id="inputMsg" value="中华人民共和国"/>
+<button type="button" onclick="sendText()">test hello</button>
+<br>
+# 67867862 <br>
+电话号码: <input type="text" id="phoneNo" value="13121385119"/>
+<button type="button" onclick="startDial('')">开始拨号</button>
+<button type="button" onclick="startDial('0')">加0拨号</button>
+<button type="button" onclick="stopDial()">结束拨号</button>
+<br>
+电话拨打：&nbsp
+<button type="button" onclick="doHook(true)">电话摘机</button>
+<button type="button" onclick="doHook(false)">电话挂机</button>
+
+<!-- &nbsp | &nbsp -->
+<br>电话线路：&nbsp
+<button type="button" onclick="doPhone(true)">线路连接</button>
+<button type="button" onclick="doPhone(false)">线路断开</button>
+
+&nbsp | &nbsp
+<button type="button" onclick="refuseCallIn()"> 拒接来电 </button>
+<button type="button" onclick="resetCall()">重置电话</button>
+
+<!--
+<br>
+<label>
+<input name="hangup" type="checkbox" onclick="doHook_(this)" value="1" /> 摘机/挂机 </label> -->
+
+<!--
+<br>
+<label>
+<!-- <input name="hookup" type="checkbox" onclick="doPhone_(this)" value="1" /> 连线/断线</label> -->
+
+<br>
+<br>
+cookie: <TextArea type="text" id="bms_cookie">ACCESS_TICKET='TGT-171-O42vP4LGehJ3z3VGOXPteuccJWdxBvSDTa1bUlSX1VT2miqnKM-cas.ecarpo.com'
+</TextArea>
+<button type="button" onclick="addCookie()">addCookie</button>
+<br>
+<br>
+response: --------------------------------------------
+<br>
+<div id="output" style="height:500px;overflow-y:scroll;background-color:#eee">
+</div>
+<div id="currentput" >
+</div>
+
+<br>
+api功能列表说明：
+<br>
+// phone operation
+
+<br>
+const EV_LOCAL_PHONE_HOOK      =       'evLocalPhoneHook';                //本地话筒摘机
+<br>
+const EV_LOCAL_PHONE_HANG      =       'evLocalPhoneHang';                //本地话筒挂机
+
+<br>
+const EV_REMOTE_PHONE_HOOK      =       'evRemotePhoneHook';              //远程话筒摘机 (保留)
+<br>
+const EV_REMOTE_PHONE_HANG      =       'evRemotePhoneHang';              //远程话筒摘机 (保留)
+<br>
+
+
+<br>
+const CMD_START_DIAL           =       'cmdStartDial';              //开始拨号
+<br>
+const CMD_STOP_DIAL            =       'cmdStopDial';               //停止拨号
+<br>
+const CMD_DO_HOOK              =       'cmdDoHook';                 //摘机、挂机
+<br>
+const CMD_DO_PHONE             =       'cmdDoPhone';                //断开、连接
+<br>
+const CMD_CONFIRM_DIAL         =       'cmdConfirmDial';            //确认去电
+<br>
+<br>
+const CMD_CONFIRM_CALL_IN      =       'cmdConfirmCallIn';          //确认来电
+<br>
+const CMD_REFUSE_CALL_IN       =       'cmdRefuseCallIn';           //拒接来电
+<br>
+const CMD_RESET_CALL           =       'cmdResetCall';              //清除电话日志
+<br>
+const CMD_ADD_COOKIE           =       'cmdAddCookie';              //addCookie
+<br>
+<br>
+const EV_GET_CALL_ID           =       'evGetCallId';               //获取到来电号码
+<br>
+const EV_STOP_CALL_IN          =       'evStopCallIn';              //对方停止呼入产生一个未接电话
+<br>
+const EV_CALL_IN_RING          =       'evCallInRing';              //来电响铃
+<br>
+const EV_CALL_IN_START         =       'evCallInStart';             //来电开始
+<br>
+const EV_CALL_IN_ESTABLISHED   =       'evCallInEstablished';       //来电接通
+<br>
+const EV_CALL_IN_END           =       'evCallInEnd';               //来电结束
+<br>
+<br>
+
+const EV_CALL_OUT_RING         =       'evCallOutRing';              //去电响铃
+<br>
+const EV_CALL_OUT_START        =       'evCallOutStart';             //来电开始
+<br>
+const EV_CALL_OUT_ESTABLISHED  =       'evCallOutEstablished';       //来电接通
+<br>
+const EV_CALL_OUT_END          =       'evCallOutEnd';               //来电结束
+<br>
+<br>
+const EV_PSTNFree              =       'evPSTNFree';                  //电话线路空闲
+<br>
+
+const EV_SHOW_LOG              =       'evShowLog';                  //显日志
+<br>
+const EV_SHOW_STATE            =       'evShowState';                //显状态
+<br>
+<br>
+说明：
+Response: {<font color="red">state!=0，则为有错误，msg中会含有错误信息。</font>
+}
+
+</html>
