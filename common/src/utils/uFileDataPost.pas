@@ -59,7 +59,7 @@ implementation
 
 uses System.JSON.Serializers, uFileRecUtils, uUploadDTO, uHttpUtils, StrUtils,
   uJsonFUtils, uPhoneConfig, Forms, uShowMsgBase, uDateTimeUtils, DateUtils,
-  uTimeUtils, uFileUtils, uRecInf, uLog4me, brisdklib;
+  uTimeUtils, uFileUtils, uRecInf, uLog4me, brisdklib, uLocalRemoteCallEv;
 
 procedure ShowSysLog(const S: String);
 begin
@@ -81,7 +81,8 @@ begin
   //
   FTimerUpScan := TThreadTimer.Create();
   FTimerUpScan.OnThreadTimer := Timer1Timer;
-  FTimerUpScan.Interval := g_PhoneConfig.UpScanInterv * TTimeCfg.minute;
+  //FTimerUpScan.Interval := g_PhoneConfig.UpScanInterv * TTimeCfg.minute;
+  FTimerUpScan.Interval := 30 * TTimeCfg.second;
   //
   FDoing := false;
   FClosed := false;
@@ -145,7 +146,9 @@ begin
         MakeFileList(sFull, FileExt, strs, includeSub, maxRows);
       //end else if (UpperCase(extractfileext(Path+sch.Name)) = UpperCase(FileExt))
       end else if SameText(sExt, FileExt) or (FileExt='.*') then begin
-        strs.Add( sFull );
+        if (not g_LocalCallEv.callUuid.equals(sch.Name)) then begin
+          strs.Add( sFull );
+        end;
       end;
       //
       sleep(0);
@@ -166,7 +169,7 @@ procedure TFileDirProcess.processDir;
       end;
       S := strs[I];
       upload(S);
-      delaySec(g_PhoneConfig.UpInterv);
+      delaySec(g_PhoneConfig.UpInterv, FClosed);
     end;
   end;
 
@@ -174,11 +177,12 @@ begin
   //self.FMRESSync.BeginWrite();
   try
     if FStrsDir.Count<=0 then begin
-      TFileUtils.MakeFileList(FSubDir, TRecInf.JSON_EXT, FStrsDir, false);
+      self.MakeFileList(FSubDir, TRecInf.JSON_EXT, FStrsDir, false);
       log4debug('processDir: make list,' + format('size(%d)', [FStrsDir.Count]));
     end else begin
       log4debug('processDir: list,' + format('size(%d)', [FStrsDir.Count]));
     end;
+    doStrs(FStrsDir);
   finally
     //self.FMRESSync.EndWrite();
   end;
@@ -202,7 +206,7 @@ begin
           , g_PhoneConfig.UpResTimeOut * TTimeCfg.minute
           , g_PhoneConfig.UpDataTimeOut  * TTimeCfg.minute);
         if ((n=UP_S_RES) or (n=UP_S_DATA)) then begin
-          delaySec(10);
+          delaySec(10, FClosed);
           continue;
         end else begin
           break;
