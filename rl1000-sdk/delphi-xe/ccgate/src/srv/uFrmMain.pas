@@ -242,6 +242,7 @@ end;
 procedure TfrmMain.miCloseClick(Sender: TObject);
 begin
   FClosing := True;
+  FFrameProp.closed;
   Close;
 end;
 

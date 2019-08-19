@@ -51,6 +51,7 @@ type
     procedure clearMsg();
     function getBindStr: string;
     function getChannelS: string;
+    procedure closed();
   end;
 
 implementation
@@ -262,6 +263,11 @@ end;
 procedure TFrameProp.clearMsg;
 begin
   memoMsg.Clear;
+end;
+
+procedure TFrameProp.closed;
+begin
+  g_FileDirProcess.closed;
 end;
 
 procedure TFrameProp.closeDevice();

@@ -119,17 +119,17 @@ begin
   end else begin
     tryCanStartDialup();
     tryTestDialDevType();
-//    if FProPhoneMsg.CallEv.validUUID then begin
+//    if g_LocalCallEv.validUUID then begin
 //      raise Exception.Create('电话处理中，稍候再拨');
 //    end;
     // StartDial set new val.
-    FProPhoneMsg.CallEv.resetVal;
-    //FProPhoneMsg.CallEv.setCallType( CALLT_CALLOUT );
-    FProPhoneMsg.CallEv.callUuid := uuid;
-    FProPhoneMsg.CallEv.FromPhone := g_phoneConfig.callingNo;
-    FProPhoneMsg.CallEv.ToPhone := phoneNo;
-    FProPhoneMsg.CallEv.callLog := '去电开始';
-    FProPhoneMsg.CallEv.saveToUUIDFile;
+    g_LocalCallEv.resetVal;
+    //g_LocalCallEv.setCallType( CALLT_CALLOUT );
+    g_LocalCallEv.callUuid := uuid;
+    g_LocalCallEv.FromPhone := g_phoneConfig.callingNo;
+    g_LocalCallEv.ToPhone := phoneNo;
+    g_LocalCallEv.callLog := '去电开始';
+    g_LocalCallEv.saveToUUIDFile;
     //
     ShowMsg(format('接收到去电命令: %s, %s', [uuid, phoneNo]), true);
     //tryStartDialup(self.PhoneConfig.OutPrefix + prefix + phoneNo);
@@ -158,7 +158,7 @@ begin
   if SameText(uuid, '') then begin
     raise Exception.Create('uuid不能为空');
   end else begin
-    FProPhoneMsg.CallEv.confirmCallIn(uuid);
+    g_LocalCallEv.confirmCallIn(uuid);
   end;
 end;
 
@@ -167,7 +167,7 @@ begin
   if SameText(uuid, '') then begin
     raise Exception.Create('uuid不能为空');
   end else begin
-    FProPhoneMsg.CallEv.confirmDial(uuid);
+    g_LocalCallEv.confirmDial(uuid);
   end;
 end;
 

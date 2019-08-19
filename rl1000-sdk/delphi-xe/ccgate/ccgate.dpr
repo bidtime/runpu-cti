@@ -61,7 +61,9 @@ uses
   uDiskUtils in 'src\utils\uDiskUtils.pas',
   uPhoneRecFile in 'src\rec\uPhoneRecFile.pas',
   uLogFile in '..\..\..\common\src\utils\uLogFile.pas',
-  uLogFileU in '..\..\..\common\src\utils\uLogFileU.pas';
+  uLogFileU in '..\..\..\common\src\utils\uLogFileU.pas',
+  uSimpleThread in 'src\utils\uSimpleThread.pas',
+  uThreadTimer in 'src\utils\uThreadTimer.pas';
 
 {$R *.res}
 

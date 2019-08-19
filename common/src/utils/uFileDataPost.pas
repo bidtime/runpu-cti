@@ -3,7 +3,7 @@ unit uFileDataPost;
 interface
 
 uses
-  Classes, SysUtils, ExtCtrls, uCallRecordDTO;
+  Classes, SysUtils, ExtCtrls, uCallRecordDTO, uThreadTimer;
 
 type
   THttpPostData = class
@@ -29,23 +29,28 @@ type
 
   TFileDirProcess = class
   private
-    FMRESSync: TSimpleRWSync;
+    //FMRESSync: TSimpleRWSync;
     FStrsDir: TStrings;
-    FTimerUpScan: TTimer;
-    FTimerUp: TTimer;
+    FTimerUpScan: TThreadTimer;
+    //FTimerUp: TTimer;
     FSubDir: string;
     FFileSize: Longint;
-    procedure Timer1Timer(Sender: TObject);
-    procedure Timer2Timer(Sender: TObject);
+    FDoing: boolean;
+    FClosed: boolean;
+    procedure Timer1Timer(Sender: TThreadTimer);
+    //procedure Timer2Timer(Sender: TObject);
     procedure upload(const jsonFileName: string; const tryNums: integer=1);
-    function getCurFileJson: string;
+    //function getCurFileJson: string;
     procedure processDir();
+    procedure makeFileList(Path: string; const FileExt: string; strs: TStrings;
+      const includeSub: boolean; const maxRows:integer=-1); overload;
   public
     constructor Create();
     destructor Destroy; override;
     //
     procedure addCurJsonFile(const jsonFile: string);
     procedure setSubDir(const subD: string);
+    procedure closed();
   end;
 
 var g_FileDirProcess: TFileDirProcess;
@@ -63,28 +68,38 @@ end;
 
 { TFileDirProcess }
 
+procedure TFileDirProcess.closed;
+begin
+  FClosed := true;
+end;
+
 constructor TFileDirProcess.Create();
 begin
   FFileSize := -1;
-  FMRESSync := TSimpleRWSync.create;
+  //FMRESSync := TSimpleRWSync.create;
   FStrsDir := TStringList.Create;
   //
-  FTimerUpScan := TTimer.Create(nil);
+  FTimerUpScan := TThreadTimer.Create();
+  FTimerUpScan.OnThreadTimer := Timer1Timer;
   FTimerUpScan.Interval := g_PhoneConfig.UpScanInterv * TTimeCfg.minute;
-  FTimerUpScan.Enabled := true;
-  FTimerUpScan.OnTimer := Timer1Timer;
   //
-  FTimerUp := TTimer.Create(nil);
+  FDoing := false;
+  FClosed := false;
+  //FTimerUpScan.StartThread; // 启动线程
+  //FTimerUpScan.Enabled := true;
+  //
+  {FTimerUp := TTimer.Create(nil);
   FTimerUp.Interval := g_PhoneConfig.UpInterv * TTimeCfg.second;
   FTimerUp.Enabled := true;
-  FTimerUp.OnTimer := Timer2Timer;
+  FTimerUp.OnTimer := Timer2Timer;}
 end;
 
 destructor TFileDirProcess.Destroy;
 begin
+  FTimerUpScan.StopThread; // 停止线程，即停止计时
   FTimerUpScan.free;
-  FTimerUp.Free;
-  FMRESSync.Free;
+  //FTimerUp.Free;
+  //FMRESSync.Free;
   FStrsDir.Free;
   inherited;
 end;
@@ -92,13 +107,71 @@ end;
 procedure TFileDirProcess.setSubDir(const subD: string);
 begin
   FSubDir := subD;
-  FTimerUpScan.Enabled := true;
-  FTimerUp.Enabled := true;
+  FTimerUpScan.StartThread;
+  //FTimerUp.Enabled := true;
+end;
+
+procedure TFileDirProcess.makeFileList(Path: string; const FileExt: string; strs: TStrings;
+  const includeSub: boolean; const maxRows:integer);
+var
+  sch: TSearchrec;
+  sFull, sExt: string;
+begin
+  //if RightStr(trim(Path), 1) <> '\' then begin
+  if not Path.EndsWith('\') then begin
+    Path := Path + '\';
+  end;
+  if not SysUtils.DirectoryExists(Path) then begin
+    exit;
+  end;
+  //
+  //if FindFirst(Path + '*', faAnyfile, sch) = 0 then begin
+  if SysUtils.FindFirst(Path + '\*.*', faAnyfile, sch) = 0 then begin
+    repeat
+      Application.ProcessMessages;
+      if (FClosed) then begin
+        break;
+      end;
+      sleep(0);
+      if ((sch.Name = '.') or (sch.Name = '..')) then begin
+        Continue;
+      end;
+      if (maxRows>-1) and (strs.Count >= maxRows) then begin
+        break;
+      end;
+      sFull := Path + sch.Name;
+      sExt := ExtractFileExt(sFull);
+      if (includeSub) and DirectoryExists(sFull) then begin
+        MakeFileList(sFull, FileExt, strs, includeSub, maxRows);
+      //end else if (UpperCase(extractfileext(Path+sch.Name)) = UpperCase(FileExt))
+      end else if SameText(sExt, FileExt) or (FileExt='.*') then begin
+        strs.Add( sFull );
+      end;
+      //
+      sleep(0);
+    until SysUtils.FindNext(sch) <> 0;
+    SysUtils.FindClose(sch);
+  end;
 end;
 
 procedure TFileDirProcess.processDir;
+
+  procedure doStrs(const strs: TStrings);
+  var i: integer;
+    S: string;
+  begin
+    for I := 0 to strs.Count - 1 do begin
+      if FClosed then begin
+        break;
+      end;
+      S := strs[I];
+      upload(S);
+      delaySec(g_PhoneConfig.UpInterv);
+    end;
+  end;
+
 begin
-  self.FMRESSync.BeginWrite();
+  //self.FMRESSync.BeginWrite();
   try
     if FStrsDir.Count<=0 then begin
       TFileUtils.MakeFileList(FSubDir, TRecInf.JSON_EXT, FStrsDir, false);
@@ -107,7 +180,7 @@ begin
       log4debug('processDir: list,' + format('size(%d)', [FStrsDir.Count]));
     end;
   finally
-    self.FMRESSync.EndWrite();
+    //self.FMRESSync.EndWrite();
   end;
 end;
 
@@ -120,7 +193,7 @@ CONST UP_S_FAIL = 3;
 procedure TFileDirProcess.upload(const jsonFileName: string; const tryNums: integer);
 var I, n: integer;
 begin
-  self.FMRESSync.BeginWrite();
+  //self.FMRESSync.BeginWrite();
   try
     if (not jsonFileName.IsEmpty) and (FileExists(jsonFileName)) then begin
       for I := 0 to tryNums - 1 do begin
@@ -138,11 +211,11 @@ begin
     end;
     Application.ProcessMessages;
   finally
-    self.FMRESSync.EndWrite();
+    //self.FMRESSync.EndWrite();
   end;
 end;
 
-function TFileDirProcess.getCurFileJson(): string;
+{function TFileDirProcess.getCurFileJson(): string;
 begin
   self.FMRESSync.BeginWrite();
   try
@@ -159,26 +232,32 @@ begin
   finally
     self.FMRESSync.EndWrite();
   end;
-end;
+end;}
 
 procedure TFileDirProcess.addCurJsonFile(const jsonFile: string);
 begin
   self.upload(jsonFile, 1);
 end;
 
-procedure TFileDirProcess.Timer1Timer(Sender: TObject);
+procedure TFileDirProcess.Timer1Timer(Sender: TThreadTimer);
 begin
   Sleep(0);
-  TTimer(Sender).enabled := false;
+  if FDoing then begin
+    exit;
+  end;
+  //
+  FDoing := true;
+  //Sender.StopThread;
   try
     processDir();
   finally
-    TTimer(Sender).enabled := true;
+    //Sender.StartThread;
+    FDoing := false;
   end;
   Sleep(0);
 end;
 
-procedure TFileDirProcess.Timer2Timer(Sender: TObject);
+{procedure TFileDirProcess.Timer2Timer(Sender: TObject);
 begin
   Sleep(0);
   TTimer(Sender).enabled := false;
@@ -188,7 +267,7 @@ begin
     TTimer(Sender).enabled := true;
   end;
   Sleep(0);
-end;
+end;}
 
 { TFileDataProcess }
 

@@ -14,10 +14,6 @@ object FrameProp: TFrameProp
     TabOrder = 0
     object PropPage: TTabSheet
       Caption = 'Log info'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         507
         483)

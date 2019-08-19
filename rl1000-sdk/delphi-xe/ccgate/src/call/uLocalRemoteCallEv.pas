@@ -27,9 +27,11 @@ type
     procedure confirmDial(const uuid: string);
     function upDataRes(): boolean;
     function getFmtTime: string;
-    class procedure upload(const json: string);
+    //class procedure upload(const json: string);
     class function fromJson(const json: string): TLocalRemoteCallEv;
   end;
+
+var g_LocalCallEv: TLocalRemoteCallEv;
 
 implementation
 
@@ -163,10 +165,10 @@ begin
   Result := true;
 end;
 
-class procedure TLocalRemoteCallEv.upload(const json: string);
+{class procedure TLocalRemoteCallEv.upload(const json: string);
 var u: TLocalRemoteCallEv;
 begin
-  TThread.Queue(nil,
+  TTask.Run(
     procedure
     begin
       u := TLocalRemoteCallEv.fromJson(json);
@@ -178,6 +180,14 @@ begin
         end;
       end;
     end);
-end;
+end;}
+
+initialization
+  g_LocalCallEv := TLocalRemoteCallEv.Create;
+
+finalization
+  if Assigned(g_LocalCallEv) then begin
+    g_LocalCallEv.Free;
+  end;
 
 end.

@@ -51,16 +51,12 @@ object frmSetting: TfrmSetting
     Top = 3
     Width = 489
     Height = 308
-    ActivePage = TabSheet1
+    ActivePage = TabSheet4
     Align = alTop
     Style = tsFlatButtons
     TabOrder = 3
     object TabSheet1: TTabSheet
       Caption = #36890#29992
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBox3: TGroupBox
         Left = 10
         Top = 2
@@ -242,10 +238,6 @@ object frmSetting: TfrmSetting
     object TabSheet3: TTabSheet
       Caption = #36890#35805
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBox2: TGroupBox
         Left = 11
         Top = 106
@@ -376,10 +368,6 @@ object frmSetting: TfrmSetting
     object TabSheet4: TTabSheet
       Caption = #19978#20256
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBox5: TGroupBox
         Left = 10
         Top = 191
@@ -414,7 +402,7 @@ object frmSetting: TfrmSetting
           Width = 53
           Height = 21
           MaxValue = 240
-          MinValue = 5
+          MinValue = 2
           TabOrder = 0
           Value = 20
         end
@@ -424,7 +412,7 @@ object frmSetting: TfrmSetting
           Width = 53
           Height = 21
           MaxValue = 3600000
-          MinValue = 15
+          MinValue = 2
           TabOrder = 1
           Value = 20
         end
@@ -555,10 +543,6 @@ object frmSetting: TfrmSetting
     object TabSheet2: TTabSheet
       Caption = #29256#26412
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBox9: TGroupBox
         Left = 10
         Top = 2
@@ -649,10 +633,6 @@ object frmSetting: TfrmSetting
     object TabSheet5: TTabSheet
       Caption = #35774#22791
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBox11: TGroupBox
         Left = 5
         Top = 10
@@ -686,10 +666,6 @@ object frmSetting: TfrmSetting
     object TabSheet6: TTabSheet
       Caption = #23384#20648
       ImageIndex = 5
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object gbDisk: TGroupBox
         Left = 10
         Top = 2
