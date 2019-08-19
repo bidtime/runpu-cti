@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, brisdklib, uCallManager,
   uFrmSetting, sgcWebSocket_Classes, uMyHttpServer, Vcl.StdCtrls, Vcl.Grids,
-  Vcl.ValEdit, Vcl.ComCtrls, uCmdParser, Vcl.ExtCtrls;
+  Vcl.ValEdit, Vcl.ComCtrls, uCmdParser, Vcl.ExtCtrls, uThreadTimer;
 
 type
   TFrameProp = class(TFrame)
@@ -19,8 +19,6 @@ type
     ValueListEditor1: TValueListEditor;
     btnApply: TButton;
     btnTest: TButton;
-    Timer1: TTimer;
-    procedure Timer1Timer(Sender: TObject);
   private
     { Private declarations }
     FCo: integer;
@@ -30,12 +28,15 @@ type
     FfrmSetting: TfrmSetting;
     FMyHttpServer: TMyHttpServer;
     FCmdParser: TCmdParser;
+    FThreadTimer: TThreadTimer;
+    FClosed: boolean;
     function OnWriteClientData(const text: string): string;
     procedure closeDevice;
     procedure broadcast(const S: string);
     procedure OnHttpConnectAfter(Connection: TObject);
     procedure OnShowSysLog(const S: String; const addQueue: boolean;
       const attachLog: boolean);
+    procedure BroadCastTimer(Sender: TThreadTimer);
   public
     { Public declarations }
     constructor Create(AOwner: TComponent); override;
@@ -115,6 +116,7 @@ begin
   memoMsg.Clear;
   FConstMsg := TStringList.Create;
   FMsgStrs := TStringList.Create;
+  FClosed := false;
 end;
 
 procedure TFrameProp.CreateServer(const lFrmHandle: longint);
@@ -163,7 +165,10 @@ begin
   //
   createHttpSrv();
   //
-  Timer1.Enabled := true;
+  FThreadTimer := TThreadTimer.Create;
+  FThreadTimer.OnThreadTimer := Self.BroadCastTimer; // 给指定 OnThreadTimer 事件
+  FThreadTimer.Interval := 500; // 间隔 0.5 秒
+  //Timer1.Enabled := true;
   ShowSysLog('服务启动结束.');
   //
   FConstMsg.AddStrings(self.memoMsg.Lines);
@@ -173,7 +178,8 @@ end;
 
 destructor TFrameProp.Destroy;
 begin
-  Timer1.Enabled := false;
+  //Timer1.Enabled := false;
+  FThreadTimer.Free; // 因在父类中已设计好，此处直接 free 即可，像普通类那样对待即可
   FMyHttpServer.free;
   //
   CloseDevice();
@@ -203,7 +209,7 @@ begin
   FCallManager.MyMsgProc(Msg);
 end;
 
-procedure TFrameProp.Timer1Timer(Sender: TObject);
+procedure TFrameProp.BroadCastTimer(Sender: TThreadTimer);
 
   function popMsg(var S: string): boolean;
   begin
@@ -216,7 +222,7 @@ procedure TFrameProp.Timer1Timer(Sender: TObject);
     end;
   end;
 
-  procedure dd();
+  {procedure dd();
   //var i: integer;
   begin
     inc(FCo);
@@ -224,14 +230,15 @@ procedure TFrameProp.Timer1Timer(Sender: TObject);
     self.ShowSysLog(IntToStr(FCo) + ' - ' + FormatDateTime('hh:nn:ss zzz', now));
     Application.ProcessMessages;
     //end;
-  end;
+  end;}
 
 var
   S: string;
 begin
   //dd();
   while popMsg(S) do begin
-    if not TTimer(Sender).Enabled then begin
+    //if not TTimer(Sender).Enabled then begin
+    if FClosed then begin
       break;
     end;
     if (not s.IsEmpty) then begin
@@ -240,6 +247,7 @@ begin
       // broadcast('broadcast: ' + FormatDateTime('hh:nn:ss zzz', now));
     end;
     sleep(0);
+    Application.ProcessMessages;
   end;
 end;
 
@@ -267,6 +275,7 @@ end;
 
 procedure TFrameProp.closed;
 begin
+  FClosed := true;
   g_FileDirProcess.closed;
 end;
 

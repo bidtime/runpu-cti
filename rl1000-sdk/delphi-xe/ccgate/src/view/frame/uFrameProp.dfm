@@ -42,10 +42,6 @@ object FrameProp: TFrameProp
     object StatPage: TTabSheet
       Caption = 'Property'
       TabVisible = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         507
         483)
@@ -93,12 +89,5 @@ object FrameProp: TFrameProp
         end
       end
     end
-  end
-  object Timer1: TTimer
-    Enabled = False
-    Interval = 200
-    OnTimer = Timer1Timer
-    Left = 364
-    Top = 342
   end
 end
