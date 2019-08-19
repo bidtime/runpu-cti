@@ -15,8 +15,10 @@ type
       const AResponse: IHTTPResponse);
     procedure DoOnRequestError(const Sender: TObject; const AError: string);
   public
+    class var FClosed: boolean;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy(); override;
+    class constructor create;
   end;
 
   THttpUtils = class
@@ -120,9 +122,9 @@ class function THttpUtils.postJson(const url: string; const S: string;
   const tmConn, tmRes: integer): string;
 var ss: TStringStream;
 begin
-  ss := TStringStream.Create(S);
+  ss := TStringStream.Create(S, TEncoding.UTF8);
   try
-    ss.WriteString(S);
+    //ss.WriteString(S);
     Result := THttpUtils.post(url, ss, tmConn, tmRes);
   finally
     ss.Free;
@@ -191,6 +193,11 @@ begin
   FOK := true;
 end;
 
+class constructor TMyHttpClient.Create;
+begin
+  fclosed := false;
+end;
+
 destructor TMyHttpClient.Destroy;
 begin
   inherited Destroy;
@@ -252,6 +259,9 @@ const FMT_END_ = '%s, %s, %s, state(%d), result(%s)';
         end;
         while not FOK do begin
           Sleep(0);
+          if FClosed then begin
+            break;
+          end;
           Application.ProcessMessages;
         end;
       except

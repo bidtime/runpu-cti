@@ -479,11 +479,12 @@ end;
 class procedure TFileDataProcess.uploadThread(const fileUrl, dataUrl,
   jsonFileName: string; const tmConn, tmRes, tmUpdate: integer);
 begin
-  TThread.Synchronize(nil,
-    procedure
-    begin
-      TFileDataProcess.upload(fileUrl, dataUrl, jsonFileName, tmConn, tmRes, tmUpdate);
-    end);
+//  TThread.Synchronize(nil,
+//    procedure
+//    begin
+//      TFileDataProcess.upload(fileUrl, dataUrl, jsonFileName, tmConn, tmRes, tmUpdate);
+//    end);
+  TFileDataProcess.upload(fileUrl, dataUrl, jsonFileName, tmConn, tmRes, tmUpdate);
 end;
 
 { THttpPostFile }
