@@ -35,7 +35,6 @@ type
       const logD: boolean);
     procedure BroadCastTimer(Sender: TObject);
     //function DoSendMsg(const bTerminated: boolean): boolean;
-    procedure insertMemo(const S: String; const addQueue: boolean);
   public
     { Public declarations }
     constructor Create(AOwner: TComponent); override;
@@ -61,28 +60,6 @@ uses uFormatMsg, uFrmAboutBox, StrUtils, uResultDTO, uCmdType, uCmdResponse,
   uLogFileU, uHttpException;
 
 {$R *.dfm}
-
-procedure TFrameProp.insertMemo(const S : String; const addQueue: boolean);
-begin
-  {if not assigned(memoMsg) then begin
-    exit;
-  end;
-  if addQueue then begin
-    FMsgStrs.Append(S);
-  end else begin
-    memoMsg.Lines.BeginUpdate;
-    try
-      //self.memoMsg.Lines.Append(TFormatMsg.getMsgSys(S));
-      //self.memoMsg.Lines.Exchange();
-      if memoMsg.Lines.Count >= g_phoneConfig.LogMaxLines then begin
-        self.memoMsg.Lines.Delete(memoMsg.Lines.Count-1);
-      end;
-      self.memoMsg.Lines.insert(0, TFormatMsg.getMsgSys(S));
-    finally
-      memoMsg.Lines.EndUpdate;
-    end;
-  end;}
-end;
 
 procedure TFrameProp.OnShowSysLog(const S: String; const addQueue: boolean;
   const logD: boolean);
@@ -180,15 +157,10 @@ begin
   //
   createHttpSrv();
   //
-//  FThreadTimer := TThreadTimer.Create;
-//  FThreadTimer.OnThreadTimer := Self.BroadCastTimer; // 给指定 OnThreadTimer 事件
-//  FThreadTimer.Interval := 500; // 间隔 0.5 秒
   FTimerQueue.Enabled := true;
   //
   //FMyThread.Start;
   ShowSysLog('服务启动结束.');
-  //
-  //FConstMsg.AddStrings(self.memoMsg.Lines);
   //
   g_FileDirProcess.setSubDir(TFileRecUtils.getDirOfRec(TRecInf.CALL));
 end;
@@ -324,7 +296,7 @@ end;
 procedure TFrameProp.OnHttpConnectAfter(Connection: TObject);
 var
   S, res: string;
-  I: integer;
+  //I: integer;
 begin
   {for I := 0 to self.FConstMsg.Count - 1 do begin
     S := self.FConstMsg[I];
@@ -336,6 +308,9 @@ begin
       break;
     end;
   end;}
+  S := 'server is started...';
+  res := TCmdResponse.successJson(EV_SHOW_LOG, S);
+  self.FMyHttpServer.writeData(Connection, res);
 end;
 
 function TFrameProp.OnWriteClientData(const text: string): string;

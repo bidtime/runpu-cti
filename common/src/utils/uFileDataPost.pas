@@ -70,8 +70,8 @@ begin
   //
   FTimerUpScan := TTimer.create(nil);
   FTimerUpScan.Enabled := false;
-  //FTimerUpScan.Interval := g_PhoneConfig.UpScanInterv * TTimeCfg.minute;
-  FTimerUpScan.Interval := 5 * TTimeCfg.second;
+  FTimerUpScan.Interval := g_PhoneConfig.UpScanInterv * TTimeCfg.minute;
+  //FTimerUpScan.Interval := 5 * TTimeCfg.second;
   FTimerUpScan.OnTimer := Timer1Timer;
 end;
 
@@ -132,10 +132,9 @@ begin
   FStrsDir := TStringList.Create;
   FTimerPost := TTimer.create(nil);
   FTimerPost.Enabled := false;
-  //FTimerPost.Interval := g_PhoneConfig.UpInterv * TTimeCfg.minute;
-  FTimerPost.Interval := 15 * TTimeCfg.second;
+  FTimerPost.Interval := g_PhoneConfig.UpInterv * TTimeCfg.minute;
+  //FTimerPost.Interval := 15 * TTimeCfg.second;
   FTimerPost.OnTimer := Timer1Timer;
-  //FTimerUpScan.Interval := 30 * TTimeCfg.second;
 end;
 
 destructor TFileJsonProcess.Destroy;
