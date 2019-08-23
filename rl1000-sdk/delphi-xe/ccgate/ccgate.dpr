@@ -62,8 +62,11 @@ uses
   uPhoneRecFile in 'src\rec\uPhoneRecFile.pas',
   uLogFile in '..\..\..\common\src\utils\uLogFile.pas',
   uLogFileU in '..\..\..\common\src\utils\uLogFileU.pas',
-  uSimpleThread in 'src\utils\uSimpleThread.pas',
-  uThreadTimer in 'src\utils\uThreadTimer.pas';
+  uHttpException in 'src\utils\uHttpException.pas',
+  uHttpResultDTO in 'src\utils\uHttpResultDTO.pas',
+  uFileStrsProcess in 'src\utils\uFileStrsProcess.pas',
+  uFrameMemo in 'src\view\frame\uFrameMemo.pas' {frameMemo: TFrame},
+  uQueueManager in 'src\view\frame\uQueueManager.pas';
 
 {$R *.res}
 

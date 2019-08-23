@@ -40,6 +40,7 @@ type
     function getStartTime(): string;
     class function transJson(const json: string;
       const fm: TJsonFormatting=TJsonFormatting.None): string;
+    property beginTime: string read startTime;
   end;
 
   TCallRecordDTO = class(TCallRecordBase)
@@ -80,6 +81,7 @@ type
     function validUUID(): boolean;
     procedure setCallUUID(const uuid: string);
     function crConnect(const n: Smallint): boolean;
+    function toBaseJson(): string;
     //
     property resFileName: string read getUUIDFileRes;
     property jsonFileName: string read getUUIDFileJson;
@@ -327,6 +329,11 @@ function TCallRecordDTO.crConnect(const n: Smallint): boolean;
 begin
   self.callResult := n;
   Result := (n = CRESULT_CONNECTED);
+end;
+
+function TCallRecordDTO.toBaseJson: string;
+begin
+  Result := TCallRecordBase.transJson(toJsonV());
 end;
 
 function TCallRecordDTO.toJson(): string;

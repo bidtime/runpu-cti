@@ -3,7 +3,7 @@ unit uResultDTO;
 interface
 
 uses
-  Classes;
+  Classes, SysUtils;
 
 type
   TResultData = class

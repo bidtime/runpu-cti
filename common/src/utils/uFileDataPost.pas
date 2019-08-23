@@ -3,63 +3,57 @@ unit uFileDataPost;
 interface
 
 uses
-  Classes, SysUtils, ExtCtrls, uCallRecordDTO, uThreadTimer;
+  Classes, SysUtils, ExtCtrls, uCallRecordDTO, uUploadDTO, uFileStrsProcess;
 
 type
-  THttpPostData = class
-  public
-    class function upload(const url: string; const callRecDTO: TCallRecordDTO;
-      const tmConn: integer; const tmUpdate: integer): boolean;
-  end;
-
-  THttpPostFile = class
-  public
-    class function upload(const url, fileName: string; var recDTO: TCallRecordDTO;
-      const tmConn, tmRes: integer): boolean;
-  end;
-
   TFileDataProcess = class
   private
-    class function upload(const fileUrl, dataUrl, jsonFileName: string;
+    class function uploadRaw(const fileUrl, dataUrl, jsonFileName: string;
       const tmConn, tmRes, tmUpdate: integer): integer; static;
   public
     class procedure uploadThread(const fileUrl, dataUrl, jsonFileName: string;
       const tmConn, tmRes, tmUpdate: integer); static;
   end;
 
-  TFileDirProcess = class
+  TFileJsonProcess = class
   private
-    //FMRESSync: TSimpleRWSync;
+    FTimerPost: TTimer;
     FStrsDir: TStrings;
-    FTimerUpScan: TThreadTimer;
-    //FTimerUp: TTimer;
-    FSubDir: string;
-    FFileSize: Longint;
-    FDoing: boolean;
-    FClosed: boolean;
-    procedure Timer1Timer(Sender: TThreadTimer);
-    //procedure Timer2Timer(Sender: TObject);
-    procedure upload(const jsonFileName: string; const tryNums: integer=1);
-    //function getCurFileJson: string;
-    procedure processDir();
-    procedure makeFileList(Path: string; const FileExt: string; strs: TStrings;
-      const includeSub: boolean; const maxRows:integer=-1); overload;
+    procedure Timer1Timer(Sender: TObject);
+    function getCurJsonFile: string;
   public
     constructor Create();
     destructor Destroy; override;
+    procedure starttimer();
+    procedure endtimer;
+    procedure setStrsDir(strs: TStrings);
+    property StrsDir: TStrings read FStrsDir write SetStrsDir;
+  end;
+
+  TFileDirProcess = class
+  private
+    FSubDir: string;
+    FFileStrs: TFileStrsProcess;
+    FJsonProcess: TFileJsonProcess;
     //
-    procedure addCurJsonFile(const jsonFile: string);
+    FTimerUpScan: TTimer;
+    procedure Timer1Timer(Sender: TObject);
+  public
+    constructor Create();
+    destructor Destroy; override;
     procedure setSubDir(const subD: string);
-    procedure closed();
+    procedure starttimer();
+    procedure endtimer;
   end;
 
 var g_FileDirProcess: TFileDirProcess;
 
 implementation
 
-uses System.JSON.Serializers, uFileRecUtils, uUploadDTO, uHttpUtils, StrUtils,
+uses uFileRecUtils, StrUtils, windows,
   uJsonFUtils, uPhoneConfig, Forms, uShowMsgBase, uDateTimeUtils, DateUtils,
-  uTimeUtils, uFileUtils, uRecInf, uLog4me, brisdklib, uLocalRemoteCallEv;
+  uTimeUtils, uFileUtils, uRecInf, uLog4me, brisdklib, uLocalRemoteCallEv,
+  uHttpException, uHttpResultDTO;
 
 procedure ShowSysLog(const S: String);
 begin
@@ -68,156 +62,173 @@ end;
 
 { TFileDirProcess }
 
-procedure TFileDirProcess.closed;
-begin
-  FClosed := true;
-end;
-
 constructor TFileDirProcess.Create();
 begin
-  FFileSize := -1;
-  //FMRESSync := TSimpleRWSync.create;
-  FStrsDir := TStringList.Create;
+  inherited;
+  FFileStrs := TFileStrsProcess.Create;
+  FJsonProcess := TFileJsonProcess.Create;
   //
-  FTimerUpScan := TThreadTimer.Create();
-  FTimerUpScan.OnThreadTimer := Timer1Timer;
+  FTimerUpScan := TTimer.create(nil);
+  FTimerUpScan.Enabled := false;
   //FTimerUpScan.Interval := g_PhoneConfig.UpScanInterv * TTimeCfg.minute;
-  FTimerUpScan.Interval := 30 * TTimeCfg.second;
-  //
-  FDoing := false;
-  FClosed := false;
-  //FTimerUpScan.StartThread; // 启动线程
-  //FTimerUpScan.Enabled := true;
-  //
-  {FTimerUp := TTimer.Create(nil);
-  FTimerUp.Interval := g_PhoneConfig.UpInterv * TTimeCfg.second;
-  FTimerUp.Enabled := true;
-  FTimerUp.OnTimer := Timer2Timer;}
+  FTimerUpScan.Interval := 5 * TTimeCfg.second;
+  FTimerUpScan.OnTimer := Timer1Timer;
 end;
 
 destructor TFileDirProcess.Destroy;
 begin
-  FTimerUpScan.StopThread; // 停止线程，即停止计时
+  FJsonProcess.Free;
+  //
+  FTimerUpScan.Enabled := false;
   FTimerUpScan.free;
-  //FTimerUp.Free;
-  //FMRESSync.Free;
-  FStrsDir.Free;
+  FFileStrs.Free;
   inherited;
 end;
 
 procedure TFileDirProcess.setSubDir(const subD: string);
 begin
+  //FFileStrs.SubDir := subD;
   FSubDir := subD;
-  FTimerUpScan.StartThread;
-  //FTimerUp.Enabled := true;
+  FTimerUpScan.Enabled := true;
 end;
 
-procedure TFileDirProcess.makeFileList(Path: string; const FileExt: string; strs: TStrings;
-  const includeSub: boolean; const maxRows:integer);
-var
-  sch: TSearchrec;
-  sFull, sExt: string;
+procedure TFileDirProcess.starttimer;
 begin
-  //if RightStr(trim(Path), 1) <> '\' then begin
-  if not Path.EndsWith('\') then begin
-    Path := Path + '\';
-  end;
-  if not SysUtils.DirectoryExists(Path) then begin
-    exit;
-  end;
+  FTimerUpScan.Enabled := true;
+end;
+
+procedure TFileDirProcess.endtimer;
+begin
+  FTimerUpScan.Enabled := true;
+end;
+
+procedure TFileDirProcess.Timer1Timer(Sender: TObject);
+begin
+  TThread.Synchronize(nil,
+    procedure
+    begin
+      TTimer(Sender).Enabled := false;
+      try
+        if FJsonProcess.StrsDir.Count<=0 then begin
+          FJsonProcess.endtimer;
+          //
+          FFileStrs.readStrs(FSubDir, FJsonProcess.StrsDir);
+          //FJsonProcess.SetStrsDir( FFileStrs.StrsDir );
+          //
+          FJsonProcess.starttimer;
+        end;
+      finally
+        TTimer(Sender).Enabled := true;
+      end;
+      Sleep(0);
+    end);
+end;
+
+{ TFileJosonProcess }
+
+constructor TFileJsonProcess.Create();
+begin
+  inherited;
+  FStrsDir := TStringList.Create;
+  FTimerPost := TTimer.create(nil);
+  FTimerPost.Enabled := false;
+  //FTimerPost.Interval := g_PhoneConfig.UpInterv * TTimeCfg.minute;
+  FTimerPost.Interval := 15 * TTimeCfg.second;
+  FTimerPost.OnTimer := Timer1Timer;
+  //FTimerUpScan.Interval := 30 * TTimeCfg.second;
+end;
+
+destructor TFileJsonProcess.Destroy;
+begin
+  FTimerPost.Enabled := false;
+  FTimerPost.free;
   //
-  //if FindFirst(Path + '*', faAnyfile, sch) = 0 then begin
-  if SysUtils.FindFirst(Path + '\*.*', faAnyfile, sch) = 0 then begin
-    repeat
-      Application.ProcessMessages;
-      if (FClosed) then begin
-        break;
-      end;
-      sleep(0);
-      if ((sch.Name = '.') or (sch.Name = '..')) then begin
-        Continue;
-      end;
-      if (maxRows>-1) and (strs.Count >= maxRows) then begin
-        break;
-      end;
-      sFull := Path + sch.Name;
-      sExt := ExtractFileExt(sFull);
-      if (includeSub) and DirectoryExists(sFull) then begin
-        MakeFileList(sFull, FileExt, strs, includeSub, maxRows);
-      //end else if (UpperCase(extractfileext(Path+sch.Name)) = UpperCase(FileExt))
-      end else if SameText(sExt, FileExt) or (FileExt='.*') then begin
-        if (not g_LocalCallEv.callUuid.equals(sch.Name)) then begin
-          strs.Add( sFull );
-        end;
-      end;
-      //
-      sleep(0);
-    until SysUtils.FindNext(sch) <> 0;
-    SysUtils.FindClose(sch);
+  FStrsDir.Free;
+  inherited;
+end;
+
+procedure TFileJsonProcess.endtimer;
+begin
+  FTimerPost.Enabled := false;
+end;
+
+procedure TFileJsonProcess.setStrsDir(strs: TStrings);
+begin
+  self.FStrsDir.Assign( strs );
+  starttimer;
+end;
+
+procedure TFileJsonProcess.starttimer;
+begin
+  FTimerPost.Enabled := true;
+end;
+
+function TFileJsonProcess.getCurJsonFile(): string;
+begin
+  if (not p_closed^) and (FStrsDir.count > 0) then begin
+    Result := FStrsDir[0];
+    ShowSysLog('get file:' + Result);
+    FStrsDir.Delete(0);
+  end else begin
+    ShowSysLog('get file: empty');
+    Result := '';
   end;
 end;
 
-procedure TFileDirProcess.processDir;
-
-  procedure doStrs(const strs: TStrings);
-  var i: integer;
-    S: string;
-  begin
-    for I := 0 to strs.Count - 1 do begin
-      if FClosed then begin
-        break;
-      end;
-      S := strs[I];
-      upload(S);
-      delaySec(g_PhoneConfig.UpInterv, FClosed);
-    end;
-  end;
-
+procedure TFileJsonProcess.Timer1Timer(Sender: TObject);
+var b: boolean;
 begin
-  //self.FMRESSync.BeginWrite();
-  try
-    if FStrsDir.Count<=0 then begin
-      self.MakeFileList(FSubDir, TRecInf.JSON_EXT, FStrsDir, false);
-      log4debug('processDir: make list,' + format('size(%d)', [FStrsDir.Count]));
-    end else begin
-      log4debug('processDir: list,' + format('size(%d)', [FStrsDir.Count]));
-    end;
-    doStrs(FStrsDir);
-  finally
-    //self.FMRESSync.EndWrite();
-  end;
-end;
-
-CONST UP_S_NONE = -1;
-CONST UP_S_RES = 0;
-CONST UP_S_DATA = 1;
-CONST UP_S_SUCCESS = 2;
-CONST UP_S_FAIL = 3;
-
-procedure TFileDirProcess.upload(const jsonFileName: string; const tryNums: integer);
-var I, n: integer;
-begin
-  //self.FMRESSync.BeginWrite();
-  try
-    if (not jsonFileName.IsEmpty) and (FileExists(jsonFileName)) then begin
-      for I := 0 to tryNums - 1 do begin
-        n := TFileDataProcess.upload(g_PhoneConfig.UpResUrl, g_PhoneConfig.UpDataUrl
-          , jsonFileName, g_PhoneConfig.UpConnTimeOut * TTimeCfg.minute
-          , g_PhoneConfig.UpResTimeOut * TTimeCfg.minute
-          , g_PhoneConfig.UpDataTimeOut  * TTimeCfg.minute);
-        if ((n=UP_S_RES) or (n=UP_S_DATA)) then begin
-          delaySec(10, FClosed);
-          continue;
+  TThread.Synchronize(nil,
+    procedure
+    var jsonFileName: string;
+    begin
+      TTimer(Sender).Enabled := false;
+      try
+        b := false;
+        jsonFileName := getCurJsonFile();
+        if (not jsonFileName.IsEmpty) then begin
+          try
+            TFileDataProcess.uploadThread(g_PhoneConfig.UpResUrl, g_PhoneConfig.UpDataUrl
+              , jsonFileName, g_PhoneConfig.UpConnTimeOut * TTimeCfg.minute
+              , g_PhoneConfig.UpResTimeOut * TTimeCfg.minute
+              , g_PhoneConfig.UpDataTimeOut  * TTimeCfg.minute);
+            b := true;
+          except
+            on e: THttpBreakException do begin
+              b := false;
+            end;
+            on e: THttpNoLoginException do begin
+              b := false;
+            end;
+          end;
+          //
+          if (not b) then begin
+            FStrsDir.Clear;
+            ShowSysLog('error, strs count set 0');
+          end else begin
+            ShowSysLog('strs count is 0');
+          end;
         end else begin
-          break;
+          ShowSysLog('strs count is 0');
         end;
+      finally
+        TTimer(Sender).Enabled := b;
       end;
-    end;
-    Application.ProcessMessages;
-  finally
-    //self.FMRESSync.EndWrite();
-  end;
+      Sleep(0);
+    end);
 end;
+
+{class procedure TFileJsonProcess.doStrs(const strs: TStrings);
+var process: TFileJsonProcess;
+begin
+  process := TFileJsonProcess.Create;
+  try
+    process.setStrsDir(strs);
+  finally
+    process.Free;
+  end;
+  Sleep(0);
+end;}
 
 {function TFileDirProcess.getCurFileJson(): string;
 begin
@@ -238,42 +249,13 @@ begin
   end;
 end;}
 
-procedure TFileDirProcess.addCurJsonFile(const jsonFile: string);
-begin
-  self.upload(jsonFile, 1);
-end;
-
-procedure TFileDirProcess.Timer1Timer(Sender: TThreadTimer);
-begin
-  Sleep(0);
-  if FDoing then begin
-    exit;
-  end;
-  //
-  FDoing := true;
-  //Sender.StopThread;
-  try
-    processDir();
-  finally
-    //Sender.StartThread;
-    FDoing := false;
-  end;
-  Sleep(0);
-end;
-
-{procedure TFileDirProcess.Timer2Timer(Sender: TObject);
-begin
-  Sleep(0);
-  TTimer(Sender).enabled := false;
-  try
-    upload( getCurFileJson() );
-  finally
-    TTimer(Sender).enabled := true;
-  end;
-  Sleep(0);
-end;}
-
 { TFileDataProcess }
+
+CONST UP_S_NONE = -1;
+CONST UP_S_RES = 0;
+CONST UP_S_DATA = 1;
+CONST UP_S_SUCCESS = 2;
+CONST UP_S_FAIL = 3;
 
 const MV_BAD = 3;
 const MV_FAIL = 2;
@@ -283,15 +265,15 @@ const UP_FLAG_RES = 0;
 const UP_FLAG_DATA = 1;
 const UP_FLAG_FINAL = 2;
 
-class function TFileDataProcess.upload(const fileUrl, dataUrl: string;
+class function TFileDataProcess.uploadRaw(const fileUrl, dataUrl: string;
   const jsonFileName: string; const tmConn, tmRes, tmUpdate: integer): integer;
 
   function doPreUpRes(const u: TCallRecordDTO): integer;
   begin
     if (u.upResNums >= g_phoneConfig.UpResMaxNum) then begin
       Result := MV_FAIL;        //  2;                        //goto mvFail;
-//    end else if (TDateTimeUtils.DaysBetween(u.startTime) >=
-//        g_phoneConfig.delRecInterv) then begin
+    end else if (TDateTimeUtils.DaysBetween(u.beginTime) >=
+        g_phoneConfig.delRecInterv) then begin
       Result := MV_BAD;         // 3;                        //goto mvBad;
     end else begin
       Result := MV_UPLOADING;   //  1;                      //goto uploadingRes;
@@ -302,9 +284,9 @@ class function TFileDataProcess.upload(const fileUrl, dataUrl: string;
   begin
     if (u.upDataNums >= g_phoneConfig.UpDataMaxNum) then begin
       Result := MV_FAIL;  //2;                  //goto mvFail;
-//    end else if (TDateTimeUtils.DaysBetween(u.startTime) >=
-//        g_phoneConfig.delRecInterv) then begin
-//      Result := MV_BAD;   // 3;                  //goto mvBad;
+    end else if (TDateTimeUtils.DaysBetween(u.beginTime) >=
+        g_phoneConfig.delRecInterv) then begin
+      Result := MV_BAD;   // 3;                  //goto mvBad;
     end else begin
       Result := MV_UPLOADING; //1;                  //goto uploadingRes;
     end;
@@ -445,7 +427,7 @@ uploadData:
         ShowSysLog(format('准备上传数据: %d, %s',
           [nUpDataState, jsonFileName]));
         if (nUpDataState=MV_UPLOADING) then begin
-          if (THttpPostData.upload(dataUrl, u, tmConn, tmRes)) then begin
+          if (THttpPostData.post(dataUrl, u, tmConn, tmRes)) then begin
             u.setUpFlag(UP_FLAG_FINAL);
             u.saveToFile(jsonFileName);
             goto mvUpload;
@@ -479,86 +461,11 @@ end;
 class procedure TFileDataProcess.uploadThread(const fileUrl, dataUrl,
   jsonFileName: string; const tmConn, tmRes, tmUpdate: integer);
 begin
-//  TThread.Synchronize(nil,
-//    procedure
-//    begin
-//      TFileDataProcess.upload(fileUrl, dataUrl, jsonFileName, tmConn, tmRes, tmUpdate);
-//    end);
-  TFileDataProcess.upload(fileUrl, dataUrl, jsonFileName, tmConn, tmRes, tmUpdate);
-end;
-
-{ THttpPostFile }
-
-class function THttpPostFile.upload(const url, fileName: string;
-  var recDTO: TCallRecordDTO; const tmConn, tmRes: integer): boolean;
-
-  procedure cloneFileData(const fileData: TFileUpData);
+  TThread.Synchronize(nil,
+  procedure
   begin
-    recDTO.fileKey := fileData.url;
-    recDTO.fileName := fileData.name;
-    recDTO.fileSize := fileData.size;
-  end;
-
-  function doEv(const S: string; var msg: string): boolean;
-  var u: TReturnDTO<TFileUpData>;
-  begin
-    u := TReturnDTOUtils.DeSerialize<TFileUpData>(S);
-    try
-      if u.success then begin
-        cloneFileData(u.data);
-      end else begin
-        msg := u.msg;
-      end;
-      Result := u.success;
-    finally
-      u.free;
-    end;
-  end;
-
-var S, msg: string;
-begin
-  Result := false;
-  try
-    S := THttpUtils.upload(url, fileName, tmConn, tmRes);
-    Result := doEv(S, msg);
-    if Result then begin
-      if recDTO.fileKey.IsEmpty then begin
-        ShowSysLog(format('上传文件成功: %s, fileKey为空, %s', [url, fileName]));
-      end else begin
-        ShowSysLog(format('上传文件成功: %s, fileKey=%s, %s', [url, recDTO.fileKey, fileName]));
-      end;
-    end else begin
-      ShowSysLog(format('上传文件失败: %s, %s, %s ', [url, msg, fileName]));
-    end;
-  except
-    on E: Exception do begin
-      ShowSysLog(format('上传文件出错: %s, %s, %s ', [url, e.Message, fileName]));
-    end;
-  end;
-end;
-
-{ THttpPostData }
-
-class function THttpPostData.upload(const url: string; const callRecDTO: TCallRecordDTO;
-  const tmConn: integer; const tmUpdate: integer): boolean;
-var S, msg, ctx, json: string;
-begin
-  Result := false;
-  try
-    ctx := callRecDTO.toJsonV();
-    json := TCallRecordBase.transJson(ctx);
-    S := THttpUtils.postJson(url, json, tmConn, tmUpdate);
-    Result := TReturnDTOUtils.success(S, msg);
-    if Result then begin
-      ShowSysLog(format('上传数据成功: %s, %s ', [url, ctx]));
-    end else begin
-      ShowSysLog(format('上传数据失败: %s, %s, %s ', [url, msg, ctx]));
-    end;
-  except
-    on E: Exception do begin
-      ShowSysLog(format('上传数据出错: %s, %s, %s ', [url, e.Message, ctx]));
-    end;
-  end;
+    TFileDataProcess.uploadRaw(fileUrl, dataUrl, jsonFileName, tmConn, tmRes, tmUpdate);
+  end);
 end;
 
 initialization

@@ -421,7 +421,7 @@ object frmSetting: TfrmSetting
           Top = 24
           Width = 53
           Height = 21
-          MaxValue = 10
+          MaxValue = 60
           MinValue = 1
           TabOrder = 2
           Value = 1

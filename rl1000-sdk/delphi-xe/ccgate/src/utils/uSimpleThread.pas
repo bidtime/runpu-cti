@@ -97,7 +97,7 @@ type
 implementation
 
 uses
-  ActiveX;
+  ActiveX, windows, forms;
 
 procedure TSimpleThread.AfterExecute;
 begin
@@ -273,19 +273,41 @@ begin
   FTagID := Value;
 end;
 
-procedure TSimpleThread.SleepExceptStopped(ATimeOut: Cardinal);
+procedure delay2(dwMilliseconds: DWORD; const bclosed: boolean);//Longint
 var
-  BOldTime: Cardinal;
+  Tick: DWord;
+  Event: THandle;
 begin
+  Event := CreateEvent(nil, False, False, nil);
+  try
+    Tick := GetTickCount + dwMilliseconds;
+    while (dwMilliseconds > 0) and
+      (MsgWaitForMultipleObjects(1, Event, False, dwMilliseconds, QS_ALLINPUT) <> WAIT_TIMEOUT) do
+    begin
+      if bClosed then begin
+        break;
+      end;
+      Application.ProcessMessages;
+      dwMilliseconds := Tick - GetTickcount;
+    end;
+  finally
+    CloseHandle(Event);
+  end;
+end;
+
+procedure TSimpleThread.SleepExceptStopped(ATimeOut: Cardinal);
+//var BOldTime: Cardinal;
+begin
+  delay2(ATimeOut, WaitStop);
   // sleep 时检测退出指令,以确保线程顺序退出
   // 多个线程同时工作，要保证正确退出，确实不容易
-  BOldTime := GetTickCount;
-  while not WaitStop do
-  begin
-    sleep(50);
-    if (GetTickCount - BOldTime) > ATimeOut then
-      break;
-  end;
+//  BOldTime := GetTickCount;
+//  while not WaitStop do begin
+//    sleep(50);
+//    if (GetTickCount - BOldTime) > ATimeOut then begin
+//      break;
+//    end;
+//  end;
 end;
 
 procedure TSimpleThread.StartThread;

@@ -267,7 +267,7 @@ end;
 
 procedure TfrmMain.actnClearExecute(Sender: TObject);
 begin
-  self.FFrameProp.memoMsg.Clear;
+  self.FFrameProp.clearMsg;
 end;
 
 procedure TfrmMain.actnEndExecute(Sender: TObject);

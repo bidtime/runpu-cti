@@ -6,50 +6,35 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, brisdklib, uCallManager,
   uFrmSetting, sgcWebSocket_Classes, uMyHttpServer, Vcl.StdCtrls, Vcl.Grids,
-  Vcl.ValEdit, Vcl.ComCtrls, uCmdParser, Vcl.ExtCtrls;
+  Vcl.ValEdit, Vcl.ComCtrls, uCmdParser, Vcl.ExtCtrls, uFrameMemo;
 
 type
-   TFuncSendEvent = function(): boolean of object;
-
-  TMyThread = class(TThread)
-  protected
-    FFuncSendEvent: TFuncSendEvent;
-    procedure Execute; override;
-    procedure DoMyWorkByWhile;
-  public
-    constructor Create;
-    property FuncSendEvent: TFuncSendEvent read FFuncSendEvent write FFuncSendEvent;
-  end;
   TFrameProp = class(TFrame)
     Pages: TPageControl;
     PropPage: TTabSheet;
-    PortGroup: TGroupBox;
-    memoMsg: TMemo;
     StatPage: TTabSheet;
-    GroupBox1: TGroupBox;
-    ValueListEditor1: TValueListEditor;
-    btnApply: TButton;
-    btnTest: TButton;
+    frameMemo1: TframeMemo;
+    frameMemo2: TframeMemo;
+    TabSheet1: TTabSheet;
+    frameMemo3: TframeMemo;
   private
     { Private declarations }
     //FCo: integer;
-    FConstMsg: TStrings;
-    FMsgStrs: TStrings;
     FCallManager: TCallManager;
     FfrmSetting: TfrmSetting;
     FMyHttpServer: TMyHttpServer;
     FCmdParser: TCmdParser;
-    FMyThread: TMyThread;
-    //FThreadTimer: TThreadTimer;
-    FClosed: boolean;
+    //FMyThread: TMyThread;
+    FTimerQueue: TTimer;
+    //FThreadTimer: TMyThread;
     function OnWriteClientData(const text: string): string;
     procedure closeDevice;
     procedure broadcast(const S: string);
     procedure OnHttpConnectAfter(Connection: TObject);
     procedure OnShowSysLog(const S: String; const addQueue: boolean;
-      const attachLog: boolean);
-    //procedure BroadCastTimer(Sender: TThreadTimer);
-    function DoSendMsg: boolean;
+      const logD: boolean);
+    procedure BroadCastTimer(Sender: TObject);
+    //function DoSendMsg(const bTerminated: boolean): boolean;
     procedure insertMemo(const S: String; const addQueue: boolean);
   public
     { Public declarations }
@@ -58,7 +43,7 @@ type
     //
     procedure createServer(const lFrmHandle: longint);
     procedure stopServer();
-    procedure MyMsgProc(var Msg:TMessage); message BRI_EVENT_MESSAGE;
+    procedure MyMsgProc(var Msg: TMessage); message BRI_EVENT_MESSAGE;
     procedure ShowSysLog(const S: String);
     procedure restart;
     //
@@ -73,66 +58,52 @@ implementation
 
 uses uFormatMsg, uFrmAboutBox, StrUtils, uResultDTO, uCmdType, uCmdResponse,
   uPhoneConfig, uShowMsgBase, uFileDataPost, uFileRecUtils, uRecInf, uLog4me,
-  uLogFileU, uHttpUtils;
+  uLogFileU, uHttpException;
 
 {$R *.dfm}
 
 procedure TFrameProp.insertMemo(const S : String; const addQueue: boolean);
 begin
-      if addQueue then begin
-        FMsgStrs.Append(S);
-      end else begin
-        memoMsg.Lines.BeginUpdate;
-        try
-          //self.memoMsg.Lines.Append(TFormatMsg.getMsgSys(S));
-          //self.memoMsg.Lines.Exchange();
-          if memoMsg.Lines.Count >= g_phoneConfig.LogMaxLines then begin
-            self.memoMsg.Lines.Delete(memoMsg.Lines.Count-1);
-          end;
-          self.memoMsg.Lines.insert(0, TFormatMsg.getMsgSys(S));
-        finally
-          memoMsg.Lines.EndUpdate;
-        end;
-      end;
-end;
-
-procedure TFrameProp.OnShowSysLog(const S : String; const addQueue: boolean;
-  const attachLog: boolean);
-//  procedure insertMemo(const S: String);
-//  begin
-////    TThread.Synchronize(nil,
-////      procedure
-////      begin
-//        if addQueue then begin
-//          FMsgStrs.Append(S);
-//        end else begin
-//          memoMsg.Lines.BeginUpdate;
-//          try
-//            //self.memoMsg.Lines.Append(TFormatMsg.getMsgSys(S));
-//            //self.memoMsg.Lines.Exchange();
-//            if memoMsg.Lines.Count >= g_phoneConfig.LogMaxLines then begin
-//              self.memoMsg.Lines.Delete(memoMsg.Lines.Count-1);
-//            end;
-//            self.memoMsg.Lines.insert(0, TFormatMsg.getMsgSys(S));
-//          finally
-//            memoMsg.Lines.EndUpdate;
-//          end;
-//        end;
-////      end);
-//  end;
-begin
-  if self.FClosed then begin
+  {if not assigned(memoMsg) then begin
     exit;
   end;
-  log4debug(S);
-  if attachLog then begin
-    TLogFileU.info(S);
+  if addQueue then begin
+    FMsgStrs.Append(S);
+  end else begin
+    memoMsg.Lines.BeginUpdate;
+    try
+      //self.memoMsg.Lines.Append(TFormatMsg.getMsgSys(S));
+      //self.memoMsg.Lines.Exchange();
+      if memoMsg.Lines.Count >= g_phoneConfig.LogMaxLines then begin
+        self.memoMsg.Lines.Delete(memoMsg.Lines.Count-1);
+      end;
+      self.memoMsg.Lines.insert(0, TFormatMsg.getMsgSys(S));
+    finally
+      memoMsg.Lines.EndUpdate;
+    end;
+  end;}
+end;
+
+procedure TFrameProp.OnShowSysLog(const S: String; const addQueue: boolean;
+  const logD: boolean);
+begin
+//  log4debug(S);
+//  if logD then begin
+//    TLogFileU.info(S);
+//  end;
+//  TThread.Synchronize(nil,
+//    procedure
+//    begin
+//      insertMemo(S, addQueue);
+//    end);
+  if (addQueue) then begin
+    self.frameMemo1.add(S);
+  end else if logD then begin
+    self.frameMemo3.add(S);
+  end else begin
+    self.frameMemo2.add(S);
   end;
-  TThread.Synchronize(nil,
-    procedure
-    begin
-      insertMemo(S, addQueue);
-    end);
+  log4debug(S);
   Application.ProcessMessages;
   Sleep(0);
 end;
@@ -153,12 +124,14 @@ end;
 constructor TFrameProp.Create(AOwner: TComponent);
 begin
   inherited create(AOwner);
-  memoMsg.Clear;
-  FConstMsg := TStringList.Create;
-  FMsgStrs := TStringList.Create;
-  FClosed := false;
-  FMyThread := TMyThread.create;
-  FMyThread.FuncSendEvent := self.DoSendMsg;
+  FTimerQueue := TTimer.Create(nil);
+  FTimerQueue.Enabled := false;
+  FTimerQueue.Interval := 200;
+  FTimerQueue.OnTimer := BroadCastTimer;
+//  FMyThread := TMyThread.create(50);
+//  FMyThread.FuncSendEvent := self.DoSendMsg;
+  self.frameMemo1.Logd := true;
+  self.frameMemo2.Logd := false;
 end;
 
 procedure TFrameProp.CreateServer(const lFrmHandle: longint);
@@ -210,34 +183,29 @@ begin
 //  FThreadTimer := TThreadTimer.Create;
 //  FThreadTimer.OnThreadTimer := Self.BroadCastTimer; // 给指定 OnThreadTimer 事件
 //  FThreadTimer.Interval := 500; // 间隔 0.5 秒
-  //Timer1.Enabled := true;
-  //DoSendMsg();
-  FMyThread.Start;
+  FTimerQueue.Enabled := true;
+  //
+  //FMyThread.Start;
   ShowSysLog('服务启动结束.');
   //
-  FConstMsg.AddStrings(self.memoMsg.Lines);
+  //FConstMsg.AddStrings(self.memoMsg.Lines);
   //
   g_FileDirProcess.setSubDir(TFileRecUtils.getDirOfRec(TRecInf.CALL));
 end;
 
 destructor TFrameProp.Destroy;
 begin
-  FClosed := true;
-  TMyHttpClient.FClosed := true;
-  g_FileDirProcess.closed;
-
-  FMyThread.Terminate;
-  //Timer1.Enabled := false;
+//  FMyThread.Terminate;
+//  FMyThread.WaitFor;
+//  FMyThread.Free;
+  FTimerQueue.Free;
   //FThreadTimer.Free; // 因在父类中已设计好，此处直接 free 即可，像普通类那样对待即可
-  FClosed := true;
   FMyHttpServer.free;
   //
   CloseDevice();
   FCallManager.Free;
   FfrmSetting.Free;
   FCmdParser.Free;
-  FMsgStrs.Free;
-  FConstMsg.Free;
   inherited;
 end;
 
@@ -259,9 +227,7 @@ begin
   FCallManager.MyMsgProc(Msg);
 end;
 
-//procedure TFrameProp.BroadCastTimer(Sender: TThreadTimer);
-
-function TFrameProp.DoSendMsg(): boolean;
+{function TFrameProp.DoSendMsg(const bTerminated: boolean): boolean;
 
   function popMsg(var S: string): boolean;
   begin
@@ -274,46 +240,59 @@ function TFrameProp.DoSendMsg(): boolean;
     end;
   end;
 
-  {procedure dd();
-  //var i: integer;
-  begin
-    inc(FCo);
-    //for I := 0 to 100000 do begin
-    self.ShowSysLog(IntToStr(FCo) + ' - ' + FormatDateTime('hh:nn:ss zzz', now));
-    Application.ProcessMessages;
-    //end;
-  end;}
 var S: string;
 begin
-  //dd();
-  //while popMsg(S) do begin
-  //if not TTimer(Sender).Enabled then begin
-  if FClosed then begin
+  if bTerminated then begin
     Result := false;
   end else begin
     Result := true;
     popMsg(S);
     if (not s.IsEmpty) then begin
       broadcast(s);
-    //end else begin
-      // broadcast('broadcast: ' + FormatDateTime('hh:nn:ss zzz', now));
     end;
   end;
-  sleep(50);
-  Application.ProcessMessages;
-  //end;}
+end;}
+
+procedure TFrameProp.BroadCastTimer(Sender: TObject);
+var S: string;
+begin
+  TThread.Synchronize(nil,
+    procedure
+    begin
+      TTimer(Sender).Enabled := false;
+      try
+        Application.ProcessMessages;
+        S := frameMemo1.QueueMsg.getS();
+        if (not s.IsEmpty) then begin
+          broadcast(s);
+        end;
+        {if self.FMsgStrs.Count > 0 then begin
+          S := self.FMsgStrs[0];
+          self.FMsgStrs.Delete(0);
+          if (not s.IsEmpty) then begin
+            broadcast(s);
+          end;
+        //end else begin
+          // broadcast('broadcast: ' + FormatDateTime('hh:nn:ss zzz', now));
+        end;}
+        Application.ProcessMessages;
+      finally
+        TTimer(Sender).Enabled := true;
+      end;
+    end);
 end;
 
 procedure TFrameProp.broadcast(const S: string);
 //var rep:string;
 begin
   if Assigned(FMyHttpServer) then begin
+    FMyHttpServer.broadcast(S);
     //rep := TResultDTO<TResultData>.successJson(showState, S);
-    TThread.Synchronize(nil,
-      procedure
-      begin
-        FMyHttpServer.broadcast(S);
-      end);
+    //TThread.Synchronize(nil,
+    //  procedure
+    //  begin
+    //    FMyHttpServer.broadcast(S);
+    //  end);
   end;
 end;
 
@@ -327,11 +306,14 @@ end;
 
 procedure TFrameProp.clearMsg;
 begin
-  memoMsg.Clear;
+  self.frameMemo1.Clear;
+  self.frameMemo2.Clear;
+  self.frameMemo3.Clear;
 end;
 
 procedure TFrameProp.closed;
 begin
+  g_closed := true;
 end;
 
 procedure TFrameProp.closeDevice();
@@ -344,7 +326,7 @@ var
   S, res: string;
   I: integer;
 begin
-  for I := 0 to self.FConstMsg.Count - 1 do begin
+  {for I := 0 to self.FConstMsg.Count - 1 do begin
     S := self.FConstMsg[I];
     if not s.IsEmpty then begin
       res := TCmdResponse.successJson(EV_SHOW_LOG, S);
@@ -353,7 +335,7 @@ begin
     if i>=5 then begin
       break;
     end;
-  end;
+  end;}
 end;
 
 function TFrameProp.OnWriteClientData(const text: string): string;
@@ -369,34 +351,6 @@ end;
 function TFrameProp.getBindStr(): string;
 begin
   Result := g_PhoneConfig.httpInfo;
-end;
-
-{ TMyThread }
-
-constructor TMyThread.Create;
-begin
-  inherited Create(True);
-end;
-
-procedure TMyThread.DoMyWorkByWhile;
-//var totalCount: Integer;
-begin
-//  totalCount := 0;
-  //上述循环也可以改为
-  while (not Terminated) do begin
-    //Inc(totalCount);
-    //Writeln('第' + IntToStr(totalCount) + '次循环 @' + FormatDateTime('yyyy-MM-dd HH:mm:ss', Now));
-    //Sleep(500);
-    if not FuncSendEvent() then begin
-      break;
-    end;
-  end;
-end;
-
-procedure TMyThread.Execute;
-begin
-  FreeOnTerminate := True;
-  DoMyWorkByWhile;
 end;
 
 end.

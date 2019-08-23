@@ -15,7 +15,6 @@ type
       const AResponse: IHTTPResponse);
     procedure DoOnRequestError(const Sender: TObject; const AError: string);
   public
-    class var FClosed: boolean;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy(); override;
     class constructor create;
@@ -50,7 +49,7 @@ type
 
 implementation
 
-uses System.NetConsts, System.Net.URLClient, uShowMsgBase, Forms, uLog4me;
+uses System.NetConsts, System.Net.URLClient, uShowMsgBase, Forms, uLog4me, uHttpException;
 
 procedure ShowSysLog(const S: String);
 begin
@@ -195,7 +194,6 @@ end;
 
 class constructor TMyHttpClient.Create;
 begin
-  fclosed := false;
 end;
 
 destructor TMyHttpClient.Destroy;
@@ -237,6 +235,9 @@ const FMT_END_ = '%s, %s, %s, state(%d), result(%s)';
             //ShowSysLog('postGet: data TStringStream, ' + (TStringStream(ob)).DataString);
             self.ContentType := 'application/json';
             lResponse := self.Post(Url, TStringStream(ob), ssRst);
+            if p_Closed^ then begin
+              //self.
+            end;
           end else if ob is TStream then begin
             //ShowSysLog('postGet: data TStream, size ' + IntToStr((TStream(ob)).Size));
             lResponse := self.Post(Url, TStream(ob), ssRst);
@@ -259,7 +260,7 @@ const FMT_END_ = '%s, %s, %s, state(%d), result(%s)';
         end;
         while not FOK do begin
           Sleep(0);
-          if FClosed then begin
+          if p_Closed^ then begin
             break;
           end;
           Application.ProcessMessages;
@@ -297,6 +298,7 @@ begin
       //cookieS := lHttp.CookieManager.CookieHeaders(TURI.Create(url));
       log4info(method + ': end, ' + format(FMT_END_, [url, method, getType(), statusCode, Result]));
     end else begin
+      raise THttpBreakException.create(format('httpCode(%d)', [statusCode]));
       //ShowSysLog(method + ': end, ' + format(FMT_END, [url, method, getType(), Result]));
       log4error(method + ': end, ' + format(FMT_END_, [url, method, getType(), statusCode, Result]));
     end;

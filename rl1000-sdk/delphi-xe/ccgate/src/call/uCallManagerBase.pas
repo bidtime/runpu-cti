@@ -73,21 +73,21 @@ var //e:TBriEvent_Data;
   id:BRIINT16;
 begin
   Result := false;
-  ShowMsg('初始化设备开始...');
+  ShowMsg('初始化设备开始...', true);
   resetVal();
   if CPC_OpenDevice(0, 0, NULL) > 0 then begin
     FDevType := CPC_DevInfo(0, CPC_DEVINFO_GETTYPE);
     FDevChanls := CPC_DevInfo(0, CPC_DEVINFO_GETCHANNELS);
-    ShowMsg('初始化设备成功,总共通道：' + IntToStr(FDevChanls));
+    ShowMsg('初始化设备成功,总共通道：' + IntToStr(FDevChanls), true);
     // for
     for id := 0 to ( FDevChanls - 1 ) do begin
       //建议软件测试时建议关闭看门狗,正式发布时开启看门狗
       //如果测试软件不关闭看门狗,在程序断点停留超过5秒,设备将被自动复位,就需要重新打开设备了
       if g_phoneConfig.ctrlWatchDog then begin
-        ShowMsg('自动复位开关: ' + '开启');
+        ShowMsg('自动复位开关: ' + '开启', true);
         CPC_SetDevCtrl(id, CPC_CTRL_WATCHDOG, 1);   // 0/1：关闭/打开设备看门狗
       end else begin
-        ShowMsg('自动复位开关: ' + '关闭');
+        ShowMsg('自动复位开关: ' + '关闭', true);
         CPC_SetDevCtrl(id, CPC_CTRL_WATCHDOG, 0);   // 0/1：关闭/打开设备看门狗
       end;
       // FAmMic_idx, FAm_SpkOut_Idx
@@ -111,18 +111,18 @@ begin
         + ' 序列号=' + IntToStr(CPC_DevInfo(id, CPC_DEVINFO_GETSERIAL))
         + ' 设备类型=' + IntToStr(CPC_DevInfo(id, CPC_DEVINFO_GETTYPE))
         + ' 芯片类型=' + IntToStr(CPC_DevInfo(id, CPC_DEVINFO_GETCHIPTYPE))
-        + ' 模块=' + GetChannelModule(0));
+        + ' 模块=' + GetChannelModule(0), true);
     end;
     // items reset
     if FListChannel.Count > 0 then begin
       FChanelId := 0;
     end;
-    ShowMsg('初始化通道参数完成');
+    ShowMsg('初始化通道参数完成', true);
     Result := true;
   end else begin
-    ShowMsg('打开设备失败,请检查设备是否已经插入并安装了驱动,并且没有其它程序已经打开设备');
+    ShowMsg('打开设备失败,请检查设备是否已经插入并安装了驱动,并且没有其它程序已经打开设备', true);
   end;
-  ShowMsg('初始化设备完成.');
+  ShowMsg('初始化设备完成.', true);
 end;
 
 function TCallManagerBase.OpenDevice(var cfg: TPhoneConfig): boolean;
@@ -142,10 +142,10 @@ end;
 
 procedure TCallManagerBase.CloseDevice();
 begin
-  ShowMsg('设备关闭开始...');
+  ShowMsg('设备关闭开始...', true);
   CPC_CloseDevice(ODT_ALL, 0);
   FListChannel.Clear();
-  ShowMsg('设备关闭结束.');
+  ShowMsg('设备关闭结束.', true);
 end;
 
 function TCallManagerBase.GetChannelModule(chid: smallint):string;

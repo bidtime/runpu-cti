@@ -10,7 +10,6 @@ type
   private
   public
     { Public declarations }
-    //
     constructor Create();
     destructor Destroy; override;
     //
@@ -25,13 +24,14 @@ type
     //
     procedure confirmCallIn(const uuid: string);
     procedure confirmDial(const uuid: string);
-    function upDataRes(): boolean;
+    //function upDataRes(): boolean;
     function getFmtTime: string;
     //class procedure upload(const json: string);
     class function fromJson(const json: string): TLocalRemoteCallEv;
   end;
 
 var g_LocalCallEv: TLocalRemoteCallEv;
+  p_LocalCallEv: ^TLocalRemoteCallEv;
 
 implementation
 
@@ -134,7 +134,7 @@ begin
   Result := inherited toJsonV(TJsonFormatting.Indented);
 end;
 
-function TLocalRemoteCallEv.upDataRes(): boolean;
+//function TLocalRemoteCallEv.upDataRes(): boolean;
 
 //  function rename_force(const OldName, NewName: string): boolean;
 //  begin
@@ -154,16 +154,16 @@ function TLocalRemoteCallEv.upDataRes(): boolean;
 //    log4debug('renameFileRes: ' + BoolToStr(Result, true));
 //  end;
 
-begin
-  upLog := '等待上传';
-  //renameFileRes;
-  if (calltype = CALLT_CALLIN) then begin           // 来电
-    g_FileDirProcess.addCurJsonFile(jsonFileName);
-  end else begin                                    //其他：去电
-    g_FileDirProcess.addCurJsonFile(jsonFileName);
-  end;
-  Result := true;
-end;
+//begin
+//  upLog := '等待上传';
+//  //renameFileRes;
+//  if (calltype = CALLT_CALLIN) then begin           // 来电
+//    g_FileDirProcess.addCurJsonFile(jsonFileName);
+//  end else begin                                    //其他：去电
+//    g_FileDirProcess.addCurJsonFile(jsonFileName);
+//  end;
+//  Result := true;
+//end;
 
 {class procedure TLocalRemoteCallEv.upload(const json: string);
 var u: TLocalRemoteCallEv;
@@ -184,6 +184,7 @@ end;}
 
 initialization
   g_LocalCallEv := TLocalRemoteCallEv.Create;
+  p_LocalCallEv := @g_LocalCallEv;
 
 finalization
   if Assigned(g_LocalCallEv) then begin

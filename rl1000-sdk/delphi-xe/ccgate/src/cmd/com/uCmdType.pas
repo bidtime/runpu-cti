@@ -24,7 +24,7 @@ const EV_CALL_OUT_RING_BACK    =       'evCallOutRingBack';          //²¦ºÅ½áÊø£
 
 const EV_PSTNFree              =       'evPSTNFree';                 //µç»°ÏßÂ·¿ÕÏÐ
 
-const EV_DEV_ERROR             =       'evDevError';                 //Ó²¼þ´íÎó
+const EV_DEV_ERROR             =       'evDevError';                 //Ó²¼þ´íÎó£¬Éè±¸°Î³ý
 
 const EV_SHOW_LOG              =       'evShowLog';                  //ÏÔÊ¾ÈÕÖ¾
 const EV_SHOW_STATE            =       'evShowState';                //ÏÔÊ¾×´Ì¬
