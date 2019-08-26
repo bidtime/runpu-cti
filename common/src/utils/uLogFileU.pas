@@ -36,38 +36,26 @@ end;
 
 class procedure TLogFileU.debug(msg: AnsiString);
 begin
-  TThread.Queue(nil,
-  procedure
-  begin
-    g_logFile.log4debug(msg);
-  end);
+  g_logFile.log4debug(msg);
 end;
 
 class procedure TLogFileU.info(msg: AnsiString);
 begin
-  TThread.Queue(nil,
-  procedure
-  begin
-    g_logFile.log4info(msg);
-  end);
+  g_logFile.log4info(msg);
 end;
 
 class procedure TLogFileU.error(msg: AnsiString);
 begin
-  TThread.Queue(nil,
-  procedure
-  begin
-    g_logFile.log4error(msg);
-  end);
+  g_logFile.log4error(msg);
 end;
 
 class procedure TLogFileU.warn(msg: AnsiString);
 begin
-  TThread.Queue(nil,
-  procedure
-  begin
-    g_logFile.log4warn(msg);
-  end);
+//  TThread.Queue(nil,
+//  procedure
+//  begin
+  g_logFile.log4warn(msg);
+//  end);
 end;
 
 class constructor TLogFileU.Create();

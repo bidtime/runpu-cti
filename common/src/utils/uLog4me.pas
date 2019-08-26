@@ -39,38 +39,26 @@ end;
 
 procedure  log4error(msg: AnsiString); //写ERROR级别的日志
 begin
-  TThread.Queue(nil,
-  procedure
-  begin
-    g_log4me.log4error(msg);
-  end);
+  g_log4me.log4error(msg);
 end;
 
 procedure  log4warn(msg: AnsiString); //写ERROR级别的日志
 begin
-  TThread.Queue(nil,
-  procedure
-  begin
-    g_log4me.log4warn(msg);
-  end);
+  g_log4me.log4warn(msg);
 end;
 
 procedure  log4info(msg: AnsiString); //写INFO级别的日志
 begin
-  TThread.Queue(nil,
-  procedure
-  begin
-    g_log4me.log4info(msg);
-  end);
+  g_log4me.log4info(msg);
 end;
 
 procedure  log4debug(msg: AnsiString); //写DEBUG级别的日志
 begin
-  TThread.Queue(nil,
-  procedure
-  begin
-    g_log4me.log4debug(msg);
-  end);
+//  TThread.Queue(nil,
+//  procedure
+//  begin
+  g_log4me.log4debug(msg);
+//  end);
 end;
 
 // ----------- 类初始化 -------------//

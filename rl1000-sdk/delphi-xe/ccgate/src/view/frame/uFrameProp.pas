@@ -25,7 +25,6 @@ type
     FMyHttpServer: TMyHttpServer;
     FCmdParser: TCmdParser;
     //FMyThread: TMyThread;
-    FTimerQueue: TTimer;
     //FThreadTimer: TMyThread;
     function OnWriteClientData(const text: string): string;
     procedure closeDevice;
@@ -33,7 +32,8 @@ type
     procedure OnHttpConnectAfter(Connection: TObject);
     procedure OnShowSysLog(const S: String; const addQueue: boolean;
       const logD: boolean);
-    procedure BroadCastTimer(Sender: TObject);
+    //procedure BroadCastTimer(Sender: TObject);
+    procedure DoSendQueue(const S: string);
     //function DoSendMsg(const bTerminated: boolean): boolean;
   public
     { Public declarations }
@@ -56,23 +56,13 @@ type
 implementation
 
 uses uFormatMsg, uFrmAboutBox, StrUtils, uResultDTO, uCmdType, uCmdResponse,
-  uPhoneConfig, uShowMsgBase, uFileDataPost, uFileRecUtils, uRecInf, uLog4me,
-  uLogFileU, uHttpException;
+  uPhoneConfig, uShowMsgBase, uFileDataPost, uFileRecUtils, uRecInf, uHttpException;
 
 {$R *.dfm}
 
 procedure TFrameProp.OnShowSysLog(const S: String; const addQueue: boolean;
   const logD: boolean);
 begin
-//  log4debug(S);
-//  if logD then begin
-//    TLogFileU.info(S);
-//  end;
-//  TThread.Synchronize(nil,
-//    procedure
-//    begin
-//      insertMemo(S, addQueue);
-//    end);
   if (addQueue) then begin
     self.frameMemo1.add(S);
   end else if logD then begin
@@ -80,7 +70,6 @@ begin
   end else begin
     self.frameMemo2.add(S);
   end;
-  log4debug(S);
   Application.ProcessMessages;
   Sleep(0);
 end;
@@ -101,14 +90,13 @@ end;
 constructor TFrameProp.Create(AOwner: TComponent);
 begin
   inherited create(AOwner);
-  FTimerQueue := TTimer.Create(nil);
-  FTimerQueue.Enabled := false;
-  FTimerQueue.Interval := 200;
-  FTimerQueue.OnTimer := BroadCastTimer;
 //  FMyThread := TMyThread.create(50);
 //  FMyThread.FuncSendEvent := self.DoSendMsg;
+  self.frameMemo1.OnGetQueue := DoSendQueue;
+  self.frameMemo1.Timer1.Interval := 200;
   self.frameMemo1.Logd := true;
   self.frameMemo2.Logd := false;
+  self.frameMemo3.Logd := false;
 end;
 
 procedure TFrameProp.CreateServer(const lFrmHandle: longint);
@@ -157,8 +145,6 @@ begin
   //
   createHttpSrv();
   //
-  FTimerQueue.Enabled := true;
-  //
   //FMyThread.Start;
   ShowSysLog('服务启动结束.');
   //
@@ -170,7 +156,6 @@ begin
 //  FMyThread.Terminate;
 //  FMyThread.WaitFor;
 //  FMyThread.Free;
-  FTimerQueue.Free;
   //FThreadTimer.Free; // 因在父类中已设计好，此处直接 free 即可，像普通类那样对待即可
   FMyHttpServer.free;
   //
@@ -179,6 +164,18 @@ begin
   FfrmSetting.Free;
   FCmdParser.Free;
   inherited;
+end;
+
+procedure TFrameProp.DoSendQueue(const S: string);
+begin
+  if (not S.IsEmpty) then begin
+    broadcast(S);
+  end;
+//  TThread.Synchronize(nil,
+//    procedure
+//    begin
+//    end);
+  Application.ProcessMessages;
 end;
 
 function TFrameProp.ShowSetting(AOwner: TComponent): boolean;
@@ -224,35 +221,6 @@ begin
     end;
   end;
 end;}
-
-procedure TFrameProp.BroadCastTimer(Sender: TObject);
-var S: string;
-begin
-  TThread.Synchronize(nil,
-    procedure
-    begin
-      TTimer(Sender).Enabled := false;
-      try
-        Application.ProcessMessages;
-        S := frameMemo1.QueueMsg.getS();
-        if (not s.IsEmpty) then begin
-          broadcast(s);
-        end;
-        {if self.FMsgStrs.Count > 0 then begin
-          S := self.FMsgStrs[0];
-          self.FMsgStrs.Delete(0);
-          if (not s.IsEmpty) then begin
-            broadcast(s);
-          end;
-        //end else begin
-          // broadcast('broadcast: ' + FormatDateTime('hh:nn:ss zzz', now));
-        end;}
-        Application.ProcessMessages;
-      finally
-        TTimer(Sender).Enabled := true;
-      end;
-    end);
-end;
 
 procedure TFrameProp.broadcast(const S: string);
 //var rep:string;

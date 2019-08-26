@@ -2,8 +2,8 @@ object frmMain: TfrmMain
   Left = 297
   Top = 220
   Caption = 'frmMain'
-  ClientHeight = 424
-  ClientWidth = 711
+  ClientHeight = 430
+  ClientWidth = 716
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -20,8 +20,8 @@ object frmMain: TfrmMain
   TextHeight = 13
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 405
-    Width = 711
+    Top = 411
+    Width = 716
     Height = 19
     Panels = <
       item
@@ -30,6 +30,8 @@ object frmMain: TfrmMain
       item
         Width = 50
       end>
+    ExplicitTop = 405
+    ExplicitWidth = 711
   end
   object MainMenu1: TMainMenu
     Left = 376

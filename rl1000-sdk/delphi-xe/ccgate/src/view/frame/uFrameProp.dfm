@@ -22,13 +22,13 @@ object FrameProp: TFrameProp
         Height = 483
         Align = alClient
         TabOrder = 0
-        ExplicitLeft = 86
-        ExplicitTop = 120
         ExplicitWidth = 507
         ExplicitHeight = 483
         inherited memoMsg: TMemo
           Width = 507
           Height = 483
+          ExplicitWidth = 507
+          ExplicitHeight = 483
         end
       end
     end
@@ -41,13 +41,13 @@ object FrameProp: TFrameProp
         Height = 483
         Align = alClient
         TabOrder = 0
-        ExplicitLeft = 86
-        ExplicitTop = 120
         ExplicitWidth = 507
         ExplicitHeight = 483
         inherited memoMsg: TMemo
           Width = 507
           Height = 483
+          ExplicitWidth = 507
+          ExplicitHeight = 483
         end
       end
     end
@@ -60,11 +60,13 @@ object FrameProp: TFrameProp
         Height = 483
         Align = alClient
         TabOrder = 0
-        ExplicitLeft = 86
-        ExplicitTop = 120
+        ExplicitWidth = 507
+        ExplicitHeight = 483
         inherited memoMsg: TMemo
           Width = 507
           Height = 483
+          ExplicitWidth = 507
+          ExplicitHeight = 483
         end
       end
     end

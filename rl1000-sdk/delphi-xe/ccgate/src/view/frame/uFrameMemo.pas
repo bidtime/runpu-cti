@@ -3,9 +3,8 @@ unit uFrameMemo;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, ExtCtrls,
-  uQueueManager;
+  Winapi.Windows, System.SysUtils, System.Classes, Vcl.StdCtrls, Vcl.ExtCtrls,
+  Vcl.Controls, Vcl.Forms, uQueueManager;
 
 type
   TframeMemo = class(TFrame)
@@ -18,11 +17,10 @@ type
     FTimer1: TTimer;
     FLogMaxLines: integer;
     FSleep: boolean;
+    FOnGetQueue: TGetStrProc;
     procedure MyTimer(Sender: TObject);
     procedure showlog(const rec: TJRec);
     procedure logMemo(const S: string);
-    procedure logF(const S: string);
-    procedure logF_D(const S: string);
   public
     { Public declarations }
     constructor Create(AOwner: TComponent); override;
@@ -37,11 +35,13 @@ type
     property Log: boolean read FLog write FLog;
     property LogMaxLines: integer read FLogMaxLines write FLogMaxLines;
     property QueueMsg: TQueueManager read FQueueMsg;
+    property OnGetQueue: TGetStrProc read FOnGetQueue write FOnGetQueue;
+    property Timer1: TTimer read FTimer1 write FTimer1;
   end;
 
 implementation
 
-uses System.Threading, uLog4me, uLogFileU;
+uses uLog4me, uLogFileU; // , System.Threading
 
 {$R *.dfm}
 
@@ -84,16 +84,22 @@ begin
 end;
 
 procedure TframeMemo.showlog(const rec: TJRec);
+var json: string;
 begin
-  if rec.json.IsEmpty then begin
+  json := rec.json;
+  if json.IsEmpty then begin
     exit;
   end;
   if rec.logMemo then begin
-    logMemo(rec.json);
-//  end else if rec.logD then begin
-//    logF_D(rec.json);
-//  end else if rec.log then begin
-//    logF(rec.json);
+    logMemo(json);
+  end;
+  if (Assigned(self.FOnGetQueue)) then begin
+    self.FOnGetQueue(json);
+  end;
+  if rec.logD then begin
+    TLogFileU.debug(json);
+  end else if rec.log then begin
+    log4debug(json);
   end;
 end;
 
@@ -131,16 +137,6 @@ begin
   finally
     TTimer(Sender).Enabled := true;
   end;
-end;
-
-procedure TframeMemo.logF(const S: string);
-begin
-  //log4debug(S);
-end;
-
-procedure TframeMemo.logF_D(const S: string);
-begin
-  //TLogFileU.debug(S);
 end;
 
 procedure TframeMemo.logMemo(const S: string);
