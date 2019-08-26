@@ -14,6 +14,7 @@ type
     FQueueMsg: TQueueManager;
     FLogd: boolean;
     FLog: boolean;
+    FLogMemo: boolean;
     FTimer1: TTimer;
     FLogMaxLines: integer;
     FSleep: boolean;
@@ -31,6 +32,7 @@ type
     procedure start();
     procedure clear;
   public
+    property LogM: boolean read FLogMemo write FLogMemo;
     property Logd: boolean read FLogd write FLogd;
     property Log: boolean read FLog write FLog;
     property LogMaxLines: integer read FLogMaxLines write FLogMaxLines;
@@ -72,6 +74,7 @@ begin
   FTimer1.Interval := 500;
   FTimer1.OnTimer := MyTimer;
   FTimer1.Enabled := true;
+  FLogMemo := true;
   FLogd := false;
   FLog := true;
 end;
@@ -90,7 +93,7 @@ begin
   if json.IsEmpty then begin
     exit;
   end;
-  if rec.logMemo then begin
+  if (FLogMemo) and (rec.logMemo) then begin
     logMemo(json);
   end;
   if (Assigned(self.FOnGetQueue)) then begin
@@ -98,7 +101,8 @@ begin
   end;
   if rec.logD then begin
     TLogFileU.debug(json);
-  end else if rec.log then begin
+  end;
+  if rec.log then begin
     log4debug(json);
   end;
 end;
@@ -116,7 +120,6 @@ end;
 procedure TframeMemo.MyTimer(Sender: TObject);
 begin
   if FSleep then begin
-    //TTimer(Sender).Enabled := false;
     exit;
   end;
   TTimer(Sender).Enabled := false;

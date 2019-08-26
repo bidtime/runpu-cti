@@ -13,10 +13,10 @@ type
     Pages: TPageControl;
     PropPage: TTabSheet;
     StatPage: TTabSheet;
-    frameMemo1: TframeMemo;
-    frameMemo2: TframeMemo;
+    frameMemoQueue: TframeMemo;
+    frameMemoLog: TframeMemo;
     TabSheet1: TTabSheet;
-    frameMemo3: TframeMemo;
+    frameMemoLogD: TframeMemo;
   private
     { Private declarations }
     //FCo: integer;
@@ -64,11 +64,11 @@ procedure TFrameProp.OnShowSysLog(const S: String; const addQueue: boolean;
   const logD: boolean);
 begin
   if (addQueue) then begin
-    self.frameMemo1.add(S);
+    self.frameMemoQueue.add(S);
   end else if logD then begin
-    self.frameMemo3.add(S);
+    self.frameMemoLogD.add(S);
   end else begin
-    self.frameMemo2.add(S);
+    self.frameMemoLog.add(S);
   end;
   Application.ProcessMessages;
   Sleep(0);
@@ -92,11 +92,11 @@ begin
   inherited create(AOwner);
 //  FMyThread := TMyThread.create(50);
 //  FMyThread.FuncSendEvent := self.DoSendMsg;
-  self.frameMemo1.OnGetQueue := DoSendQueue;
-  self.frameMemo1.Timer1.Interval := 200;
-  self.frameMemo1.Logd := true;
-  self.frameMemo2.Logd := false;
-  self.frameMemo3.Logd := false;
+  self.frameMemoQueue.OnGetQueue := DoSendQueue;
+  self.frameMemoQueue.Timer1.Interval := 200;
+  //self.frameMemoQueue.Logd := false;
+  //self.frameMemoLog.Logd := false;
+  self.frameMemoLogD.Logd := true;
 end;
 
 procedure TFrameProp.CreateServer(const lFrmHandle: longint);
@@ -246,9 +246,9 @@ end;
 
 procedure TFrameProp.clearMsg;
 begin
-  self.frameMemo1.Clear;
-  self.frameMemo2.Clear;
-  self.frameMemo3.Clear;
+  self.frameMemoQueue.Clear;
+  self.frameMemoLog.Clear;
+  self.frameMemoLogD.Clear;
 end;
 
 procedure TFrameProp.closed;

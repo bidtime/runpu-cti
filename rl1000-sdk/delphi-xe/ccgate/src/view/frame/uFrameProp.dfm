@@ -15,7 +15,7 @@ object FrameProp: TFrameProp
     object TabSheet1: TTabSheet
       Caption = 'phone'
       ImageIndex = 2
-      inline frameMemo3: TframeMemo
+      inline frameMemoLogD: TframeMemo
         Left = 0
         Top = 0
         Width = 507
@@ -34,7 +34,7 @@ object FrameProp: TFrameProp
     end
     object StatPage: TTabSheet
       Caption = 'log'
-      inline frameMemo2: TframeMemo
+      inline frameMemoLog: TframeMemo
         Left = 0
         Top = 0
         Width = 507
@@ -53,7 +53,7 @@ object FrameProp: TFrameProp
     end
     object PropPage: TTabSheet
       Caption = 'response'
-      inline frameMemo1: TframeMemo
+      inline frameMemoQueue: TframeMemo
         Left = 0
         Top = 0
         Width = 507

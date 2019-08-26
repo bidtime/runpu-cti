@@ -51,7 +51,7 @@ object frmSetting: TfrmSetting
     Top = 3
     Width = 489
     Height = 308
-    ActivePage = TabSheet4
+    ActivePage = TabSheet6
     Align = alTop
     Style = tsFlatButtons
     TabOrder = 3
@@ -769,23 +769,23 @@ object frmSetting: TfrmSetting
         object Label33: TLabel
           Left = 16
           Top = 53
-          Width = 66
+          Width = 54
           Height = 12
-          Caption = #24050#19978#20256#24405#38899':'
+          Caption = #24050#20256#24405#38899':'
         end
         object Label32: TLabel
           Left = 16
           Top = 82
-          Width = 66
+          Width = 54
           Height = 12
-          Caption = #24453#19978#20256#24405#38899':'
+          Caption = #24453#20256#24405#38899':'
         end
         object Label34: TLabel
           Left = 15
           Top = 110
-          Width = 78
+          Width = 54
           Height = 12
-          Caption = #19978#20256#22833#36133#24405#38899':'
+          Caption = #22833#36133#24405#38899':'
         end
         object edtBadDir: TEdit
           Left = 87
@@ -842,9 +842,9 @@ object frmSetting: TfrmSetting
           OnClick = Button3Click
         end
         object edtFailDir: TEdit
-          Left = 99
+          Left = 87
           Top = 106
-          Width = 314
+          Width = 326
           Height = 20
           Color = clBtnFace
           ReadOnly = True

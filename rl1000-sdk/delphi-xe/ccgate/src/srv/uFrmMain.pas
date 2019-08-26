@@ -225,6 +225,8 @@ begin
       height := iniFile.ReadInteger('mainform', 'height', height);
       width := iniFile.ReadInteger('mainform', 'width', width);
       //
+      self.FFrameProp.Pages.ActivePageIndex := iniFile.ReadInteger('mainform', 'pageidx', 0);
+      //
       Result := true;
     end else begin
       // rec param
@@ -232,6 +234,9 @@ begin
       iniFile.WriteInteger('mainform', 'left', left);
       iniFile.WriteInteger('mainform', 'height', height);
       iniFile.WriteInteger('mainform', 'width', width);
+      //
+      iniFile.WriteInteger('mainform', 'pageidx', self.FFrameProp.Pages.ActivePageIndex);
+      //
       Result := true;
     end;
   finally
