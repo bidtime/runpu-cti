@@ -20,10 +20,10 @@ type
     destructor Destroy; override;
     //
     //procedure ShowMsgQ(const uChnId: BRIINT32; const S: String); overload;
-    procedure ShowMsg(const S: String; const attachLog: boolean=false); overload;
-    procedure ShowMsg(const S: String; const addQueue: boolean; const attachLog: boolean); overload;
-    procedure ShowMsgQ(const S: String; const attachLog: boolean=false); overload;
-    procedure ShowMsg(const uChnId: BRIINT32; const S: String; const attachLog: boolean=false); overload;
+    procedure ShowMsg(const S: String; const logD: boolean=false); overload;
+    procedure ShowMsg(const S: String; const addQueue: boolean; const logD: boolean); overload;
+    procedure ShowMsgQ(const S: String);
+    procedure ShowMsg(const uChnId: BRIINT32; const S: String; const logD: boolean=false); overload;
     function fmtMsg(const uChnId: BRIINT32; const S: String): string;
     //
     property OnShowLogs: TShowLogQueue read FOnShowLogs write setOnShowLogs;
@@ -52,19 +52,19 @@ begin
   self.FOnShowLogs := evShowLogs;
 end;
 
-procedure TShowMsgBase.ShowMsg(const S: String; const addQueue: boolean; const attachLog: boolean);
+procedure TShowMsgBase.ShowMsg(const S: String; const addQueue: boolean; const logD: boolean);
 begin
   if Assigned(FOnShowLogs) then begin
-    FOnShowLogs(S, addQueue, attachLog);
+    FOnShowLogs(S, addQueue, logD);
   end;
 end;
 
-procedure TShowMsgBase.ShowMsg(const S: String; const attachLog: boolean);
+procedure TShowMsgBase.ShowMsg(const S: String; const logD: boolean);
 begin
-  self.ShowMsg(S, false, attachLog);
+  self.ShowMsg(S, false, logD);
 end;
 
-procedure TShowMsgBase.ShowMsgQ(const S: String; const attachLog: boolean);
+procedure TShowMsgBase.ShowMsgQ(const S: String);
 begin
   self.ShowMsg(S, true, false);
 end;
@@ -74,9 +74,9 @@ begin
   Result := 'Í¨µÀ' + IntToStr(uChnId) + ', ' + S;
 end;
 
-procedure TShowMsgBase.ShowMsg(const uChnId: BRIINT32; const S: String; const attachLog: boolean);
+procedure TShowMsgBase.ShowMsg(const uChnId: BRIINT32; const S: String; const logD: boolean);
 begin
-  self.ShowMsg(fmtMsg(uChnId, S), attachLog);
+  self.ShowMsg(fmtMsg(uChnId, S), logD);
 end;
 
 initialization
