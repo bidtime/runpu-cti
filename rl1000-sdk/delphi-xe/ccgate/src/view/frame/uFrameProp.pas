@@ -129,6 +129,13 @@ procedure TFrameProp.CreateServer(const lFrmHandle: longint);
     self.FCallManager.OpenDevice(g_PhoneConfig);
   end;
 
+  procedure createFrames();
+  begin
+    self.frameMemoQueue.LogMaxLines := g_PhoneConfig.LogMaxLines;
+    self.frameMemoLog.LogMaxLines := g_PhoneConfig.LogMaxLines;
+    self.frameMemoLogD.LogMaxLines := g_PhoneConfig.LogMaxLines;
+  end;
+
 begin
   ShowSysLog('服务开始启动...');
   //
