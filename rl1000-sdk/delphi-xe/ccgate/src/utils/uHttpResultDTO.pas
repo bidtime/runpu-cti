@@ -57,7 +57,6 @@ begin
     S := THttpUtils.upload(url, fileName, tmConn, tmRes);
     dto := TReturnDTOUtils.DeSerialize<TFileUpData>(S);
     if dto.success then begin
-      ShowSysLog(format('上传文件成功: %s, fileKey=%s, %s', [url, dto.data.url, fileName]));
       if dto.data.url.IsEmpty then begin
         ShowSysLog(format('上传文件成功: %s, fileKey为空, %s', [url, fileName]));
       end else begin

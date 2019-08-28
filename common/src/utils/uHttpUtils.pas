@@ -298,9 +298,11 @@ begin
       //cookieS := lHttp.CookieManager.CookieHeaders(TURI.Create(url));
       log4info(method + ': end, ' + format(FMT_END_, [url, method, getType(), statusCode, Result]));
     end else begin
-      raise THttpBreakException.create(format('httpCode(%d)', [statusCode]));
-      //ShowSysLog(method + ': end, ' + format(FMT_END, [url, method, getType(), Result]));
       log4error(method + ': end, ' + format(FMT_END_, [url, method, getType(), statusCode, Result]));
+      if (statusCode=404) or (statusCode=403) then begin
+        raise THttpBreakException.create(format('httpCode(%d)', [statusCode]));
+      end;
+      //ShowSysLog(method + ': end, ' + format(FMT_END, [url, method, getType(), Result]));
     end;
   finally
     ssRst.Free;
