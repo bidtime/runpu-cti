@@ -299,8 +299,11 @@ begin
       log4info(method + ': end, ' + format(FMT_END_, [url, method, getType(), statusCode, Result]));
     end else begin
       log4error(method + ': end, ' + format(FMT_END_, [url, method, getType(), statusCode, Result]));
-      if (statusCode=404) or (statusCode=403) then begin
-        raise THttpBreakException.create(format('httpCode(%d)', [statusCode]));
+      if (statusCode <> 500) then begin
+        if ( (statusCode>=400) and (statusCode<500) ) or
+            ( (statusCode>500) and (statusCode<600) ) then begin
+          raise THttpBreakException.create(format('httpCode(%d)', [statusCode]));
+        end;
       end;
       //ShowSysLog(method + ': end, ' + format(FMT_END, [url, method, getType(), Result]));
     end;

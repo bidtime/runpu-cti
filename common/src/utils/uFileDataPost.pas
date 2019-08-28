@@ -167,10 +167,9 @@ function TFileJsonProcess.getCurJsonFile(): string;
 begin
   if (not p_closed^) and (FStrsDir.count > 0) then begin
     Result := FStrsDir[0];
-    ShowSysLog( format('get file: %s, strs(%d)', [Result, FStrsDir.count]));
     FStrsDir.Delete(0);
+    ShowSysLog( format('get file: %s, strs(%d)', [Result, FStrsDir.count]));
   end else begin
-    ShowSysLog( format('get file: null, strs(%d)', [FStrsDir.count]));
     Result := '';
   end;
 end;
@@ -207,8 +206,6 @@ begin
           end else begin
             ShowSysLog(format('strs count = %d', [FStrsDir.count]));
           end;
-//        end else begin
-//          ShowSysLog(format('jsonFileName is empty, get from strs(%d)', [FStrsDir.count]));
         end;
       finally
         TTimer(Sender).Enabled := not existsError;
