@@ -20,7 +20,7 @@ uses
   uFrmMain in 'src\srv\uFrmMain.pas' {frmMain},
   uHttpServerBase in 'src\srv\WebSockets\uHttpServerBase.pas',
   uMyHttpServer in 'src\srv\WebSockets\uMyHttpServer.pas',
-  uFrmAboutBox in 'src\frm\uFrmAboutBox.pas' {FrmAboutBox},
+  uFrmIntro in 'src\frm\uFrmIntro.pas' {frmIntro},
   uFrameProp in 'src\view\frame\uFrameProp.pas' {FrameProp: TFrame},
   uShowMsgBase in 'src\utils\uShowMsgBase.pas',
   uCmdBoolean in 'src\cmd\req\uCmdBoolean.pas',
@@ -66,7 +66,8 @@ uses
   uHttpResultDTO in 'src\utils\uHttpResultDTO.pas',
   uFileStrsProcess in 'src\utils\uFileStrsProcess.pas',
   uFrameMemo in 'src\view\frame\uFrameMemo.pas' {frameMemo: TFrame},
-  uQueueManager in 'src\view\frame\uQueueManager.pas';
+  uQueueManager in 'src\view\frame\uQueueManager.pas',
+  uFrmAboutBox in 'src\frm\uFrmAboutBox.pas' {FrmAboutBox};
 
 {$R *.res}
 

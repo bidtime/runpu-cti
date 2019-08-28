@@ -121,8 +121,8 @@
         </DCCReference>
         <DCCReference Include="src\srv\WebSockets\uHttpServerBase.pas"/>
         <DCCReference Include="src\srv\WebSockets\uMyHttpServer.pas"/>
-        <DCCReference Include="src\frm\uFrmAboutBox.pas">
-            <Form>FrmAboutBox</Form>
+        <DCCReference Include="src\frm\uFrmIntro.pas">
+            <Form>frmIntro</Form>
         </DCCReference>
         <DCCReference Include="src\view\frame\uFrameProp.pas">
             <Form>FrameProp</Form>
@@ -177,6 +177,10 @@
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
         <DCCReference Include="src\view\frame\uQueueManager.pas"/>
+        <DCCReference Include="src\frm\uFrmAboutBox.pas">
+            <Form>FrmAboutBox</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

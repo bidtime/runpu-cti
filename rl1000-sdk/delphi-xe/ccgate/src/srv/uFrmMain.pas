@@ -33,6 +33,9 @@ type
     MenuItem1: TMenuItem;
     miClose: TMenuItem;
     TrayIcon1: TTrayIcon;
+    actnIntro: TAction;
+    I1: TMenuItem;
+    N3: TMenuItem;
     procedure actnEndExecute(Sender: TObject);
     procedure actnStartExecute(Sender: TObject);
     procedure actnStartUpdate(Sender: TObject);
@@ -48,6 +51,7 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure actnIntroExecute(Sender: TObject);
   private
     { Private declarations }
     //FTaskMessage: DWord;
@@ -84,7 +88,7 @@ var
 
 implementation
 
-uses uFormatMsg, uFrmAboutBox, IniFiles, uTimeUtils;
+uses uFormatMsg, uFrmAboutBox, IniFiles, uTimeUtils, uFrmIntro;
 
 {$R *.dfm}
 
@@ -289,6 +293,11 @@ begin
 //  if Sender is TAction then begin
 //    TAction(Sender).Enabled := FMyHttpServer.IdHttpServer.Active;
 //  end;
+end;
+
+procedure TfrmMain.actnIntroExecute(Sender: TObject);
+begin
+  TFrmIntro.showNewForm(self);
 end;
 
 procedure TfrmMain.actnSettingExecute(Sender: TObject);

@@ -62,6 +62,12 @@ object frmMain: TfrmMain
     end
     object H1: TMenuItem
       Caption = #24110#21161'(&H)'
+      object I1: TMenuItem
+        Action = actnIntro
+      end
+      object N3: TMenuItem
+        Caption = '-'
+      end
       object A1: TMenuItem
         Action = actnAbout
       end
@@ -97,6 +103,10 @@ object frmMain: TfrmMain
     object actnAbout: TAction
       Caption = #20851#20110'(&A)'
       OnExecute = actnAboutExecute
+    end
+    object actnIntro: TAction
+      Caption = #29256#26412'(&I)'
+      OnExecute = actnIntroExecute
     end
   end
   object PopupMenu: TPopupMenu
