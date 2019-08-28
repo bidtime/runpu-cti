@@ -207,8 +207,8 @@ begin
           end else begin
             ShowSysLog(format('strs count = %d', [FStrsDir.count]));
           end;
-        end else begin
-          ShowSysLog(format('jsonFileName is empty, get from strs(%d)', [FStrsDir.count]));
+//        end else begin
+//          ShowSysLog(format('jsonFileName is empty, get from strs(%d)', [FStrsDir.count]));
         end;
       finally
         TTimer(Sender).Enabled := not existsError;
