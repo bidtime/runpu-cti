@@ -8,17 +8,23 @@ uses
 type
   THttpResultDTO = class
   private
+  protected
+    class procedure ShowSysLog(const S: String);
   public
     class function uploadR(const url, fileName: String; const tmConn,
       tmRes: integer): TReturnDTO<TFileUpData>; static;
-    class function postR(const url, json: String; const tmConn,
-      tmRes: integer): TReturnDTO<TReturnData>; static;
+    class function postR<K>(const url, json: String; const tmConn,
+      tmRes: integer): TReturnDTO<K>; static;
   end;
 
   THttpPostData = class(THttpResultDTO)
   private
   public
-    class function post(const url: string; const callRecDTO: TCallRecordDTO;
+    class function post<K>(const url: string; const callRecDTO: TCallRecordDTO;
+      const tmConn: integer; const tmUpdate: integer): boolean;
+    class function postS(const url: string; const callRecDTO: TCallRecordDTO;
+      const tmConn: integer; const tmUpdate: integer): boolean;
+    class function postN(const url: string; const callRecDTO: TCallRecordDTO;
       const tmConn: integer; const tmUpdate: integer): boolean;
   end;
 
@@ -35,7 +41,7 @@ uses System.JSON.Serializers, uFileRecUtils, uHttpUtils, StrUtils, windows,
   uJsonFUtils, uPhoneConfig, Forms, uShowMsgBase, uDateTimeUtils, DateUtils,
   uTimeUtils, uFileUtils, uRecInf, uLog4me, brisdklib, uLocalRemoteCallEv, uHttpException;
 
-procedure ShowSysLog(const S: String);
+class procedure THttpResultDTO.ShowSysLog(const S: String);
 begin
   g_ShowMsgBase.ShowMsg(S);
 end;
@@ -74,14 +80,14 @@ begin
   end;
 end;
 
-class function THttpResultDTO.postR(Const url, json: String;
-  const tmConn: integer; const tmRes: integer): TReturnDTO<TReturnData>;
+class function THttpResultDTO.postR<K>(Const url, json: String;
+  const tmConn: integer; const tmRes: integer): TReturnDTO<K>;
 var S: string;
-  dto: TReturnDTO<TReturnData>;
+  dto: TReturnDTO<K>;
 begin
   try
     S := THttpUtils.postJson(url, json, tmConn, tmRes);
-    dto := TReturnDTOUtils.DeSerialize<TReturnData>(S);
+    dto := TReturnDTOUtils.DeSerialize<K>(S);
     if dto.success then begin
       ShowSysLog(format('上传数据成功: %s, %s ', [url, json]));
     end else begin
@@ -125,12 +131,24 @@ end;
 
 { THttpPostData }
 
-class function THttpPostData.post(const url: string; const callRecDTO: TCallRecordDTO;
+class function THttpPostData.post<K>(const url: string; const callRecDTO: TCallRecordDTO;
   const tmConn: integer; const tmUpdate: integer): boolean;
-var dto: TReturnDTO<TReturnData>;
+var dto: TReturnDTO<K>;
 begin
-  dto := THttpPostData.postR(url, callRecDTO.toBaseJson(), tmConn, tmUpdate);
+  dto := THttpPostData.postR<K>(url, callRecDTO.toBaseJson(), tmConn, tmUpdate);
   Result := dto.success;
+end;
+
+class function THttpPostData.postN(const url: string;
+  const callRecDTO: TCallRecordDTO; const tmConn, tmUpdate: integer): boolean;
+begin
+  Result := post<Long>(url, callRecDTO, tmConn, tmUpdate);
+end;
+
+class function THttpPostData.postS(const url: string;
+  const callRecDTO: TCallRecordDTO; const tmConn, tmUpdate: integer): boolean;
+begin
+  Result := post<String>(url, callRecDTO, tmConn, tmUpdate);
 end;
 
 end.

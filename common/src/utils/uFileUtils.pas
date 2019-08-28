@@ -484,10 +484,10 @@ begin
                 end;
               end;
 //              if not TFile.Copy(PChar(ns), PChar(nd)) then begin
-//                log4debug(ns + '->' + nd + ', false' );
+//                ShowSysLog(ns + '->' + nd + ', false' );
 //                Exit;
 //              end else begin
-//                log4debug(ns + '->' + nd + ', true' );
+//                ShowSysLog(ns + '->' + nd + ', true' );
 //                DeleteFile(PChar(ns));
 //              end;
             end;

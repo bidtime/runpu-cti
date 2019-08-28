@@ -17,12 +17,12 @@ type
     name: string;
   end;
 
-  TReturnData = record
-  private
-    { Private declarations }
-  public
-    { Public declarations }
-  end;
+//  TReturnData = record
+//  private
+//    { Private declarations }
+//  public
+//    { Public declarations }
+//  end;
 
   TReturnDTO<T> = record
   private

@@ -121,6 +121,7 @@ begin
         TTimer(Sender).Enabled := true;
       end;
       Sleep(0);
+      Application.ProcessMessages;
     end);
 end;
 
@@ -132,7 +133,7 @@ begin
   FStrsDir := TStringList.Create;
   FTimerPost := TTimer.create(nil);
   FTimerPost.Enabled := false;
-  FTimerPost.Interval := g_PhoneConfig.UpInterv * TTimeCfg.minute;
+  FTimerPost.Interval := g_PhoneConfig.UpInterv * TTimeCfg.second;
   //FTimerPost.Interval := 15 * TTimeCfg.second;
   FTimerPost.OnTimer := Timer1Timer;
 end;
@@ -175,7 +176,7 @@ begin
 end;
 
 procedure TFileJsonProcess.Timer1Timer(Sender: TObject);
-var b: boolean;
+var existsError: boolean;
 begin
   TThread.Synchronize(nil,
     procedure
@@ -183,7 +184,7 @@ begin
     begin
       TTimer(Sender).Enabled := false;
       try
-        b := false;
+        existsError := false;
         jsonFileName := getCurJsonFile();
         if (not jsonFileName.IsEmpty) then begin
           try
@@ -191,29 +192,29 @@ begin
               , jsonFileName, g_PhoneConfig.UpConnTimeOut * TTimeCfg.minute
               , g_PhoneConfig.UpResTimeOut * TTimeCfg.minute
               , g_PhoneConfig.UpDataTimeOut  * TTimeCfg.minute);
-            b := true;
           except
             on e: THttpBreakException do begin
-              b := false;
+              existsError := true;
             end;
             on e: THttpNoLoginException do begin
-              b := false;
+              existsError := true;
             end;
           end;
           //
-          if (not b) then begin
+          if (existsError) then begin
             FStrsDir.Clear;
             ShowSysLog('error, strs count set 0');
           end else begin
-            ShowSysLog('strs count is 0');
+            ShowSysLog(format('strs count = %d', [FStrsDir.count]));
           end;
         end else begin
-          ShowSysLog('strs count is 0');
+          ShowSysLog(format('jsonFileName is empty, get from strs(%d)', [FStrsDir.count]));
         end;
       finally
-        TTimer(Sender).Enabled := b;
+        TTimer(Sender).Enabled := not existsError;
       end;
       Sleep(0);
+      Application.ProcessMessages;
     end);
 end;
 
@@ -241,7 +242,7 @@ begin
     end;
     if (FFileSize<>FStrsDir.Count) then begin
       FFileSize := FStrsDir.Count;
-      log4debug('curFileJson: ' + format('size(%d)', [FStrsDir.Count]));
+      ShowSysLog('curFileJson: ' + format('size(%d)', [FStrsDir.Count]));
     end;
   finally
     self.FMRESSync.EndWrite();
@@ -426,7 +427,7 @@ uploadData:
         ShowSysLog(format('准备上传数据: %d, %s',
           [nUpDataState, jsonFileName]));
         if (nUpDataState=MV_UPLOADING) then begin
-          if (THttpPostData.post(dataUrl, u, tmConn, tmRes)) then begin
+          if (THttpPostData.postS(dataUrl, u, tmConn, tmRes)) then begin
             u.setUpFlag(UP_FLAG_FINAL);
             u.saveToFile(jsonFileName);
             goto mvUpload;

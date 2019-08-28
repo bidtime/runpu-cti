@@ -51,7 +51,7 @@ object frmSetting: TfrmSetting
     Top = 3
     Width = 489
     Height = 308
-    ActivePage = TabSheet6
+    ActivePage = TabSheet4
     Align = alTop
     Style = tsFlatButtons
     TabOrder = 3
@@ -402,7 +402,7 @@ object frmSetting: TfrmSetting
           Width = 53
           Height = 21
           MaxValue = 240
-          MinValue = 2
+          MinValue = 1
           TabOrder = 0
           Value = 20
         end
@@ -412,7 +412,7 @@ object frmSetting: TfrmSetting
           Width = 53
           Height = 21
           MaxValue = 3600000
-          MinValue = 2
+          MinValue = 1
           TabOrder = 1
           Value = 20
         end

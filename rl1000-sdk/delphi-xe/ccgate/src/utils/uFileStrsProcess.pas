@@ -81,7 +81,7 @@ begin
       sFull := Path + sch.Name;
       sExt := ExtractFileExt(sFull);
       //ShowSysLog(sFull);
-      //log4debug(BoolToStr(g_closed, true) + ': ' + sFull);
+      //ShowSysLog(BoolToStr(g_closed, true) + ': ' + sFull);
       if (includeSub) and DirectoryExists(sFull) then begin
         MakeFileList(sFull, FileExt, strs, includeSub, maxRows);
       //end else if (UpperCase(extractfileext(Path+sch.Name)) = UpperCase(FileExt))
@@ -113,9 +113,9 @@ class procedure TFileStrsProcess.readStrs(Path: string; strs: TStrings);
 begin
   if strs.Count<=0 then begin
     TFileStrsProcess.MakeFileList(Path, TRecInf.JSON_EXT, strs, false, -1);
-    log4debug('processDir: make list,' + format('size(%d)', [strs.Count]));
+    ShowSysLog('processDir: make list,' + format('size(%d)', [strs.Count]));
   end else begin
-    log4debug('processDir: list,' + format('size(%d)', [strs.Count]));
+    ShowSysLog('processDir: list,' + format('size(%d)', [strs.Count]));
   end;
 end;
 
