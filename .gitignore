@@ -60,7 +60,7 @@
 __history/
 __recovery/
 *.~*
-rec
+bin/rec
 component
 Debug
 Release
