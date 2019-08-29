@@ -383,7 +383,7 @@ object frmSetting: TfrmSetting
           Caption = #25195#25551#30446#24405': '#27599#38548'('#20998')'
         end
         object Label12: TLabel
-          Left = 258
+          Left = 260
           Top = 56
           Width = 108
           Height = 12
@@ -395,6 +395,13 @@ object frmSetting: TfrmSetting
           Width = 84
           Height = 12
           Caption = #36830#25509#36229#26102': ('#20998')'
+        end
+        object Label35: TLabel
+          Left = 260
+          Top = 29
+          Width = 108
+          Height = 12
+          Caption = #25346#26426#35302#21457': '#27599#38548'('#31186')'
         end
         object spedUpScanInterv: TSpinEdit
           Left = 128
@@ -425,6 +432,16 @@ object frmSetting: TfrmSetting
           MinValue = 1
           TabOrder = 2
           Value = 1
+        end
+        object spedHangAftInterv: TSpinEdit
+          Left = 374
+          Top = 25
+          Width = 53
+          Height = 21
+          MaxValue = 60
+          MinValue = 0
+          TabOrder = 3
+          Value = 5
         end
       end
       object GroupBox6: TGroupBox

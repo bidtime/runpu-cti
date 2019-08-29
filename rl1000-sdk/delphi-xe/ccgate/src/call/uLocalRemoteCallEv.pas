@@ -168,18 +168,18 @@ end;
 {class procedure TLocalRemoteCallEv.upload(const json: string);
 var u: TLocalRemoteCallEv;
 begin
-  TTask.Run(
-    procedure
-    begin
-      u := TLocalRemoteCallEv.fromJson(json);
-      try
-        u.upDataRes();
-      finally
-        if Assigned(u) then begin
-          u.Free;
-        end;
-      end;
-    end);
+//  TTask.Run(
+//    procedure
+//    begin
+//      u := TLocalRemoteCallEv.fromJson(json);
+//      try
+//        u.upDataRes();
+//      finally
+//        if Assigned(u) then begin
+//          u.Free;
+//        end;
+//      end;
+//    end);
 end;}
 
 initialization

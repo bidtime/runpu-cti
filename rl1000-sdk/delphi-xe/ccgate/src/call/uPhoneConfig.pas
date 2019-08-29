@@ -52,6 +52,8 @@ type
     delLogInterv: smallint;
     delLogScanInterv: smallint;
     //
+    hangAftInterv: smallint;
+    //
     LogMaxLines: integer;
     //
     ctrlWatchDog: boolean;
@@ -152,6 +154,7 @@ begin
   //
   upgradeURL := '';
   upgradeInterv := 5;      // 1 minute
+  hangAftInterv := 5;
   //
   OutPrefix := '0';
   CallingNo := '';
@@ -198,6 +201,7 @@ function TPhoneConfig.readWriteIni(const bWrite: boolean): boolean;
         UpConnTimeOut := iniFile.ReadInteger('upload', 'connTimeOut', UpConnTimeOut);
         upScanInterv := iniFile.ReadInteger('upload', 'upScanInterv', upScanInterv);
         upInterv := iniFile.ReadInteger('upload', 'upInterv', upInterv);
+        hangAftInterv := iniFile.ReadInteger('upload', 'hangAftInterv', hangAftInterv);
         //
         delRecScanInterv := iniFile.ReadInteger('removeDir', 'delRecScanInterv', delRecScanInterv);
         delRecInterv := iniFile.ReadInteger('removeDir', 'delRecInterv', delRecInterv);
@@ -234,6 +238,7 @@ function TPhoneConfig.readWriteIni(const bWrite: boolean): boolean;
         iniFile.WriteString('up_data', 'url', UpDataUrl);
         iniFile.WriteInteger('up_data', 'timeOut', UpDataTimeOut);
         iniFile.WriteInteger('up_data', 'maxNum', UpDataMaxNum);
+        iniFile.WriteInteger('upload', 'hangAftInterv', hangAftInterv);
         // upload
         iniFile.WriteInteger('upload', 'connTimeOut', UpConnTimeOut);
         iniFile.WriteInteger('upload', 'upScanInterv', upScanInterv);

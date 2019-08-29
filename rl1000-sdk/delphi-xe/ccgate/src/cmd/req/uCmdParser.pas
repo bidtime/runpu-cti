@@ -15,9 +15,8 @@ type
 
 implementation
 
-uses SysUtils, REST.JSON, uFormatMsg, uCmdType, uCmdComm, uCmdDialup,
-  uCmdBoolean, uCmdException, uCmdPhone, uCmdCookie, uCmdResponse, uResultDTO,
-  uLog4me;
+uses SysUtils, REST.JSON, uFormatMsg, uCmdType, uCmdComm, uCmdDialup, uLog4me,
+  uCmdBoolean, uCmdException, uCmdPhone, uCmdCookie, uCmdResponse, uResultDTO;
 
 { TCmdParser }
 

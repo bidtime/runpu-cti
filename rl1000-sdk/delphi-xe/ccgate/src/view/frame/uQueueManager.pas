@@ -24,6 +24,8 @@ type
     //
     procedure put(rec: TJRec);
     function get(): TJRec;
+    function peek: TJRec;
+    //
     procedure add(const json: string; const blog: boolean; const blogd: boolean; const bmemo: boolean=true);
     procedure addLog(const json: string; const blog: boolean; const bmemo: boolean=true);
     procedure addLogD(const json: string; const blog: boolean; const bmemo: boolean=true);
@@ -36,7 +38,7 @@ type
 
 implementation
 
-uses System.SysUtils, Forms;
+uses System.SysUtils, Forms, Classes;
 //uses System.Threading;
 
 constructor TQueueManager.create;
@@ -53,30 +55,38 @@ end;
 
 procedure TQueueManager.put(rec: TJRec);
 begin
-  //TTask.run(
-//  TThread.Synchronize(nil,
-//  procedure
-//  begin
-//    Stack.Enqueue(rec);
-//  end);
-  Stack.Enqueue(rec);
+  TThread.Synchronize(nil,
+  procedure
+  begin
+    Stack.Enqueue(rec);
+  end);
 end;
 
 function TQueueManager.get: TJRec;
 var
   rec: TJRec;
 begin
-  //TTask.run(
-//  TThread.Synchronize(nil,
-//    procedure
-//    begin
-//      if Stack.Count >0 then begin
-//        rec := Stack.Extract;
-//      end;
-//    end);
-  if Stack.Count >0 then begin
-    rec := Stack.Extract;
-  end;
+  TThread.Synchronize(nil,
+    procedure
+    begin
+      if Stack.Count >0 then begin
+        rec := Stack.Dequeue;
+      end;
+    end);
+  Result := rec;
+end;
+
+function TQueueManager.peek: TJRec;
+var
+  rec: TJRec;
+begin
+  TThread.Synchronize(nil,
+    procedure
+    begin
+      if Stack.Count >0 then begin
+        rec := Stack.peek;
+      end;
+    end);
   Result := rec;
 end;
 
@@ -154,20 +164,10 @@ begin
 end;
 
 function TQueueManager.getS(): string;
-var S: string;
-  rec: TJRec;
+var rec: TJRec;
 begin
-  TThread.Synchronize(nil,
-    procedure
-    begin
-      if Stack.Count >0 then begin
-        rec := Stack.Extract;
-        S := rec.JsonS;
-      end else begin
-        S := '';
-      end;
-   end);
-  Result := S;
+  rec := get();
+  Result := rec.json;
 end;}
 
 {function TForm1.getTag(const tag: string): string;
@@ -176,42 +176,6 @@ begin
   S := get;
   //self.Memo1.Lines.Add(tag + S);
   Result := tag + S;
-end;}
-
-{procedure TQueueManager.Timer1Timer(Sender: TObject);
-begin
- TThread.Synchronize(nil,
-   procedure
-   begin
-    addLogs('time1_', get());
-   end);
-end;
-
-procedure TQueueManager.Timer2Timer(Sender: TObject);
-begin
- TThread.Synchronize(nil,
-   procedure
-   begin
-    addLogs('time2_', get());
-   end);
-end;
-
-procedure TQueueManager.Timer3Timer(Sender: TObject);
-begin
- TThread.Synchronize(nil,
-   procedure
-   begin
-     addNums('T3-', 10);
-   end);
-end;
-
-procedure TQueueManager.Timer4Timer(Sender: TObject);
-begin
- TThread.Synchronize(nil,
-   procedure
-   begin
-     addNums('T4-', 10);
-   end);
 end;}
 
 end.

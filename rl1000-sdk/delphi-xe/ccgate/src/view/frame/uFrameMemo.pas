@@ -31,6 +31,7 @@ type
     procedure stop();
     procedure start();
     procedure clear;
+    procedure setInterval(const n: Cardinal);
   public
     property LogM: boolean read FLogMemo write FLogMemo;
     property Logd: boolean read FLogd write FLogd;
@@ -38,12 +39,12 @@ type
     property LogMaxLines: integer read FLogMaxLines write FLogMaxLines;
     property QueueMsg: TQueueManager read FQueueMsg;
     property OnGetQueue: TGetStrProc read FOnGetQueue write FOnGetQueue;
-    property Timer1: TTimer read FTimer1 write FTimer1;
+    //property Timer1: TTimer read FTimer1 write FTimer1;
   end;
 
 implementation
 
-uses uLog4me, uLogFileU; // , System.Threading
+uses uLog4me, uLogFileU, System.Threading;
 
 {$R *.dfm}
 
@@ -71,7 +72,7 @@ begin
   memoMsg.Clear;
   FQueueMsg := TQueueManager.create;
   FTimer1 := TTimer.Create(nil);
-  FTimer1.Interval := 500;
+  FTimer1.Interval := 250;
   FTimer1.OnTimer := MyTimer;
   FTimer1.Enabled := true;
   FLogMemo := true;
@@ -86,9 +87,15 @@ begin
   inherited;
 end;
 
+procedure TframeMemo.setInterval(const n: Cardinal);
+begin
+  self.FTimer1.Interval := n;
+end;
+
 procedure TframeMemo.showlog(const rec: TJRec);
 var json: string;
 begin
+  Application.ProcessMessages;
   json := rec.json;
   if json.IsEmpty then begin
     exit;
@@ -105,6 +112,7 @@ begin
   if rec.log then begin
     log4debug(json);
   end;
+  Application.ProcessMessages;
 end;
 
 procedure TframeMemo.start;
@@ -124,19 +132,17 @@ begin
   end;
   TTimer(Sender).Enabled := false;
   try
-      Application.ProcessMessages;
-//    TTask.run(
-//     procedure
-//     begin
-//      TThread.Synchronize(nil,
-//        procedure
-//        begin
-//          showlog(FQueueMsg.get);
-//          Application.ProcessMessages;
-//        end);
-//     end);
-      showlog(FQueueMsg.get);
-      Application.ProcessMessages;
+    Sleep(0);
+    Application.ProcessMessages;
+    //TTask.run(procedure begin
+      TThread.Synchronize(nil,
+      procedure
+      begin
+        showlog(FQueueMsg.get);
+      end);
+    //end);
+    Sleep(0);
+    Application.ProcessMessages;
   finally
     TTimer(Sender).Enabled := true;
   end;

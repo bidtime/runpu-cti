@@ -93,7 +93,7 @@ begin
 //  FMyThread := TMyThread.create(50);
 //  FMyThread.FuncSendEvent := self.DoSendMsg;
   self.frameMemoQueue.OnGetQueue := DoSendQueue;
-  self.frameMemoQueue.Timer1.Interval := 200;
+  self.frameMemoQueue.setInterval(200);
   //self.frameMemoQueue.Logd := false;
   //self.frameMemoLog.Logd := false;
   self.frameMemoLogD.Logd := true;
@@ -178,10 +178,6 @@ begin
   if (not S.IsEmpty) then begin
     broadcast(S);
   end;
-//  TThread.Synchronize(nil,
-//    procedure
-//    begin
-//    end);
   Application.ProcessMessages;
 end;
 
@@ -233,13 +229,12 @@ procedure TFrameProp.broadcast(const S: string);
 //var rep:string;
 begin
   if Assigned(FMyHttpServer) then begin
-    FMyHttpServer.broadcast(S);
     //rep := TResultDTO<TResultData>.successJson(showState, S);
-    //TThread.Synchronize(nil,
-    //  procedure
-    //  begin
-    //    FMyHttpServer.broadcast(S);
-    //  end);
+    TThread.Synchronize(nil,
+    procedure
+    begin
+      FMyHttpServer.broadcast(S);
+    end);
   end;
 end;
 

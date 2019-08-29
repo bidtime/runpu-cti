@@ -98,11 +98,17 @@ end;
 //end;
 
 class function TReturnDTOUtils.success(const S: string; var msg: string; var code: integer): boolean;
+  procedure init();
+  begin
+    msg := '';
+    code := 0;
+  end;
 var
   jsonObj: TJSONObject;
   jsCode: TJSONValue;
 begin
   Result := false;
+  init();
   jsonObj := TJSONObject.ParseJSONValue(S) as TJSONObject;
   try
     if Assigned(jsonObj) then begin
@@ -110,11 +116,10 @@ begin
       if not Result then begin
         msg := (jsonObj.GetValue('msg') as TJSONString).value;
       end;
-      jsCode := jsonObj.GetValue('code');
-      if (not jsCode.Null) then begin
-        code := (jsCode as TJSONNumber).AsInt;
-      end else begin
-        code := 0;
+      if ( jsonObj.TryGetValue('code', jsCode) ) then begin
+        if (not jsCode.Null) then begin
+          code := (jsCode as TJSONNumber).AsInt;
+        end;
       end;
     end;
   finally

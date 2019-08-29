@@ -115,6 +115,8 @@ type
     Label34: TLabel;
     edtFailDir: TEdit;
     Button4: TButton;
+    Label35: TLabel;
+    spedHangAftInterv: TSpinEdit;
     procedure btnCloseClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnResetClick(Sender: TObject);
@@ -261,6 +263,7 @@ begin
   self.spedUpDataTimeOut.Value := g_PhoneConfig.UpDataTimeOut;
   self.spedUpDataMaxNum.Value := g_PhoneConfig.UpDataMaxNum;
   self.spedUpConnTimeOut.Value := g_PhoneConfig.UpConnTimeOut;
+  self.spedHangAftInterv.Value := g_PhoneConfig.hangAftInterv;
   //
   self.spedUpScanInterv.Value := g_PhoneConfig.UpScanInterv;
   self.spedUpInterv.Value := g_PhoneConfig.UpInterv;
@@ -311,6 +314,7 @@ begin
   g_PhoneConfig.UpDataTimeOut := self.spedUpDataTimeOut.Value;
   g_PhoneConfig.UpDataMaxNum := self.spedUpDataMaxNum.Value;
   g_PhoneConfig.UpConnTimeOut := self.spedUpConnTimeOut.Value;
+  g_PhoneConfig.hangAftInterv := self.spedHangAftInterv.Value;
   //
   g_PhoneConfig.UpScanInterv := self.spedUpScanInterv.Value;
   g_PhoneConfig.UpInterv := self.spedUpInterv.Value;
