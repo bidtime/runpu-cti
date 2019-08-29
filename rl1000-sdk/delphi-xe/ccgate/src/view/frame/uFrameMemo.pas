@@ -37,9 +37,7 @@ type
     property Logd: boolean read FLogd write FLogd;
     property Log: boolean read FLog write FLog;
     property LogMaxLines: integer read FLogMaxLines write FLogMaxLines;
-    property QueueMsg: TQueueManager read FQueueMsg;
     property OnGetQueue: TGetStrProc read FOnGetQueue write FOnGetQueue;
-    //property Timer1: TTimer read FTimer1 write FTimer1;
   end;
 
 implementation

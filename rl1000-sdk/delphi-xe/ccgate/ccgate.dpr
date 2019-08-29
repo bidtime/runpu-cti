@@ -68,7 +68,8 @@ uses
   uFrameMemo in 'src\view\frame\uFrameMemo.pas' {frameMemo: TFrame},
   uQueueBase in 'src\view\frame\uQueueBase.pas',
   uFrmAboutBox in 'src\frm\uFrmAboutBox.pas' {FrmAboutBox},
-  uQueueManager in 'src\view\frame\uQueueManager.pas';
+  uQueueManager in 'src\view\frame\uQueueManager.pas',
+  uQueueTimer in 'src\utils\uQueueTimer.pas';
 
 {$R *.res}
 

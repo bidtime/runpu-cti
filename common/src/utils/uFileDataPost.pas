@@ -37,12 +37,12 @@ type
     //
     FTimerUpScan: TTimer;
     procedure Timer1Timer(Sender: TObject);
-    function doReadStrs: boolean;
+    procedure doReadStrs;
   public
     constructor Create();
     destructor Destroy; override;
     procedure setSubDir(const subD: string);
-    procedure add(const S: string);
+    procedure add(const jsonfile: string);
     procedure starttimer();
     procedure endtimer;
   end;
@@ -67,11 +67,12 @@ begin
   inherited;
   FStrsDir := TStackBase<String>.create;
   FJsonProcess := TFileJsonProcess.Create;
+  FJsonProcess.StrsDir := FStrsDir;
   //
   FTimerUpScan := TTimer.create(nil);
   FTimerUpScan.Enabled := false;
-  FTimerUpScan.Interval := g_PhoneConfig.UpScanInterv * TTimeCfg.minute;
-  //FTimerUpScan.Interval := 10 * TTimeCfg.second;
+  //FTimerUpScan.Interval := g_PhoneConfig.UpScanInterv * TTimeCfg.minute;
+  FTimerUpScan.Interval := 10 * TTimeCfg.second;
   FTimerUpScan.OnTimer := Timer1Timer;
 end;
 
@@ -81,7 +82,6 @@ begin
   //
   FTimerUpScan.Enabled := false;
   FTimerUpScan.free;
-  //FFileStrs.Free;
   //
   FStrsDir.Free;
   inherited;
@@ -93,16 +93,16 @@ begin
   //FTimerUpScan.Enabled := true;
 end;
 
-procedure TFileDirProcess.add(const S: string);
+procedure TFileDirProcess.add(const jsonfile: string);
 begin
-  if (FTimerUpScan.Enabled) and (FStrsDir.count > 0)
-      and (not s.IsEmpty()) then begin
-    //FStrsDir.insert(0, S);
-    FStrsDir.put(S);
-  end else begin
-    FTimerUpScan.Interval := g_PhoneConfig.hangAftInterv * TTimeCfg.second;
-    FTimerUpScan.Enabled := true;
-  end;
+  TThread.Synchronize(nil,
+  procedure
+  begin
+    FStrsDir.put(jsonfile);
+    if FJsonProcess.FTimerPost.tag = 0 then begin
+      FJsonProcess.starttimer;
+    end;
+  end);
 end;
 
 procedure TFileDirProcess.starttimer;
@@ -115,28 +115,25 @@ begin
   FTimerUpScan.Enabled := true;
 end;
 
-function TFileDirProcess.doReadStrs(): boolean;
+procedure TFileDirProcess.doReadStrs();
 begin
-  Result := false;
   if self.FStrsDir.Count<=0 then begin
     FJsonProcess.endtimer;
     TFileQueueProcess.readStrs(FSubDir, FStrsDir);
     if FStrsDir.Count>0 then begin
-      Result := true;
-      FJsonProcess.StrsDir := FStrsDir;
       FJsonProcess.starttimer;
     end;
   end;
 end;
 
 procedure TFileDirProcess.Timer1Timer(Sender: TObject);
-var bOK: boolean;
 begin
   if (p_closed^) then begin
     ShowSysLog('stoped, exit');
     exit;
   end;
   TTimer(Sender).Enabled := false;
+  FTimerUpScan.Tag := 1;
   try
     Sleep(0);
     Application.ProcessMessages;
@@ -144,14 +141,14 @@ begin
       TThread.Synchronize(nil,
       procedure
       begin
-        bOK := doReadStrs();
+        doReadStrs();
       end);
     //end);
     Sleep(0);
     Application.ProcessMessages;
   finally
-    FTimerUpScan.Interval := g_PhoneConfig.UpInterv * TTimeCfg.minute;
     TTimer(Sender).Enabled := true;
+    FTimerUpScan.Tag := 0;
   end;
 end;
 
@@ -248,6 +245,7 @@ begin
   end;
   bOK := true;
   TTimer(Sender).Enabled := false;
+  TTimer(Sender).tag := 1;
   try
     Sleep(0);
     Application.ProcessMessages;
@@ -263,6 +261,7 @@ begin
     Application.ProcessMessages;
   finally
     TTimer(Sender).Enabled := bOK;
+    TTimer(Sender).tag := 0;
   end;
 end;
 
@@ -276,25 +275,6 @@ begin
     process.Free;
   end;
   Sleep(0);
-end;}
-
-{function TFileDirProcess.getCurFileJson(): string;
-begin
-  self.FMRESSync.BeginWrite();
-  try
-    if FStrsDir.count > 0 then begin
-      Result := FStrsDir[0];
-      FStrsDir.Delete(0);
-    end else begin
-      Result := '';
-    end;
-    if (FFileSize<>FStrsDir.Count) then begin
-      FFileSize := FStrsDir.Count;
-      ShowSysLog('curFileJson: ' + format('size(%d)', [FStrsDir.Count]));
-    end;
-  finally
-    self.FMRESSync.EndWrite();
-  end;
 end;}
 
 { TFileDataProcess }
@@ -385,12 +365,11 @@ begin
     if not Assigned(u) then begin
       if FileExists(jsonFileName) then begin
         ShowSysLog('json数据: 文件格式无效, ' + jsonFileName);
-        u.upLog := 'json数据: 文件格式无效';
-        u.saveToFile(jsonFileName);
       end else begin
         ShowSysLog('json数据: 文件不存在, ' + jsonFileName);
       end;
-      goto mvToBad;
+      resFileName := ChangeFileExt(jsonFileName, TRecInf.RES_EXT);
+      mvFileToDir(resFileName, jsonFileName, TRecInf.BAD, TDateTimeUtils.Now2Str());
     end else if (u.callType <> CALLT_CALLIN) and (u.callType <> CALLT_CALLOUT) then begin
       ShowSysLog(format('json数据: 呼叫类型异常, callType=%d(%s), %s',
         [u.callType, u.callTypeName, u.resFileName]));
@@ -408,11 +387,6 @@ mvToBad:
         resFileName := ChangeFileExt(jsonFileName, TRecInf.RES_EXT);
       end;
       mvFileToDir(resFileName, jsonFileName, TRecInf.BAD, u.getStartTime);
-    //end else if (u.callResult = CRESULT_NULL) or (u.callResult = CRESULT_NODONE)
-//    end else if (u.callResult <> CRESULT_CONNECTED) then begin          //如果callResult为0不用传了，移动文件到bad
-//      ShowSysLog(format('json数据: 电话未接通, callResult=%d(%s), %s',
-//        [u.callResult, u.callResultName, u.resFileName]));
-//      goto uploadData;
     end else begin
       resFileName := u.resFileName;
       ShowSysLog( format('开始上传: %s(%s, %s)', [
@@ -496,11 +470,11 @@ mvFail:
       end;
     end;
   finally
-    ShowSysLog(format('结束上传: %s, %s(%s, %s)', [u.getUpSta(),
-      ChangeFileExt(jsonFileName, ''),
-      TRecInf.RES_EXT,
-      TRecInf.JSON_EXT]));
     if Assigned(u) then begin
+      ShowSysLog(format('结束上传: %s, %s(%s, %s)', [u.getUpSta(),
+        ChangeFileExt(jsonFileName, ''),
+        TRecInf.RES_EXT,
+        TRecInf.JSON_EXT]));
       u.Free;
     end;
   end;

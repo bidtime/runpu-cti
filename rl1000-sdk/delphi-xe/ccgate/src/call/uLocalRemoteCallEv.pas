@@ -8,6 +8,7 @@ uses
 type
   TLocalRemoteCallEv = class(TCallRecordDTO)
   private
+    function upDataRes(): boolean;
   public
     { Public declarations }
     constructor Create();
@@ -24,9 +25,8 @@ type
     //
     procedure confirmCallIn(const uuid: string);
     procedure confirmDial(const uuid: string);
-    //function upDataRes(): boolean;
     function getFmtTime: string;
-    //class procedure upload(const json: string);
+    class procedure upload(const json: string);
     class function fromJson(const json: string): TLocalRemoteCallEv;
   end;
 
@@ -134,7 +134,7 @@ begin
   Result := inherited toJsonV(TJsonFormatting.Indented);
 end;
 
-//function TLocalRemoteCallEv.upDataRes(): boolean;
+function TLocalRemoteCallEv.upDataRes(): boolean;
 
 //  function rename_force(const OldName, NewName: string): boolean;
 //  begin
@@ -154,33 +154,31 @@ end;
 //    log4debug('renameFileRes: ' + BoolToStr(Result, true));
 //  end;
 
-//begin
-//  upLog := '等待上传';
-//  //renameFileRes;
-//  if (calltype = CALLT_CALLIN) then begin           // 来电
-//    g_FileDirProcess.addCurJsonFile(jsonFileName);
-//  end else begin                                    //其他：去电
-//    g_FileDirProcess.addCurJsonFile(jsonFileName);
-//  end;
-//  Result := true;
-//end;
+begin
+  upLog := '等待上传';
+  //renameFileRes;
+  g_FileDirProcess.add(jsonFileName);
+  Result := true;
+end;
 
-{class procedure TLocalRemoteCallEv.upload(const json: string);
+class procedure TLocalRemoteCallEv.upload(const json: string);
 var u: TLocalRemoteCallEv;
 begin
-//  TTask.Run(
-//    procedure
-//    begin
-//      u := TLocalRemoteCallEv.fromJson(json);
-//      try
-//        u.upDataRes();
-//      finally
-//        if Assigned(u) then begin
-//          u.Free;
-//        end;
-//      end;
-//    end);
-end;}
+  TThread.Synchronize(nil,
+    procedure
+    begin
+      u := TLocalRemoteCallEv.fromJson(json);
+      try
+        if u.validUUID then begin
+          u.upDataRes();
+        end;
+      finally
+        if Assigned(u) then begin
+          u.Free;
+        end;
+      end;
+    end);
+end;
 
 initialization
   g_LocalCallEv := TLocalRemoteCallEv.Create;
