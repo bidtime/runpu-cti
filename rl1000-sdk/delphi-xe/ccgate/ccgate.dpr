@@ -66,8 +66,9 @@ uses
   uHttpResultDTO in 'src\utils\uHttpResultDTO.pas',
   uFileStrsProcess in 'src\utils\uFileStrsProcess.pas',
   uFrameMemo in 'src\view\frame\uFrameMemo.pas' {frameMemo: TFrame},
-  uQueueManager in 'src\view\frame\uQueueManager.pas',
-  uFrmAboutBox in 'src\frm\uFrmAboutBox.pas' {FrmAboutBox};
+  uQueueBase in 'src\view\frame\uQueueBase.pas',
+  uFrmAboutBox in 'src\frm\uFrmAboutBox.pas' {FrmAboutBox},
+  uQueueManager in 'src\view\frame\uQueueManager.pas';
 
 {$R *.res}
 

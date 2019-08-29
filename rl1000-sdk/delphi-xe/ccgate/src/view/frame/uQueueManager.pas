@@ -3,7 +3,7 @@ unit uQueueManager;
 interface
 
 uses
-  Generics.Collections;
+  Generics.Collections, uQueueBase;
 
 type
   TJRec = record
@@ -12,19 +12,14 @@ type
     log: boolean;
     logD: boolean;
   end;
-  TQueueManager = class
+  TQueueManager = class(TQueueBase<TJRec>)
   private
     { Private declarations }
     FCO: integer;
-    Stack: TQueue<TJRec>;
   public
     { Public declarations }
     constructor create();
     destructor Destroy(); override;
-    //
-    procedure put(rec: TJRec);
-    function get(): TJRec;
-    function peek: TJRec;
     //
     procedure add(const json: string; const blog: boolean; const blogd: boolean; const bmemo: boolean=true);
     procedure addLog(const json: string; const blog: boolean; const bmemo: boolean=true);
@@ -41,53 +36,17 @@ implementation
 uses System.SysUtils, Forms, Classes;
 //uses System.Threading;
 
+{TQueueManager}
+
 constructor TQueueManager.create;
 begin
-  Stack := TQueue<TJRec>.Create;
+  inherited;
   FCO := -1;
 end;
 
 destructor TQueueManager.Destroy;
 begin
-  Stack.Free;
   inherited;
-end;
-
-procedure TQueueManager.put(rec: TJRec);
-begin
-  TThread.Synchronize(nil,
-  procedure
-  begin
-    Stack.Enqueue(rec);
-  end);
-end;
-
-function TQueueManager.get: TJRec;
-var
-  rec: TJRec;
-begin
-  TThread.Synchronize(nil,
-    procedure
-    begin
-      if Stack.Count >0 then begin
-        rec := Stack.Dequeue;
-      end;
-    end);
-  Result := rec;
-end;
-
-function TQueueManager.peek: TJRec;
-var
-  rec: TJRec;
-begin
-  TThread.Synchronize(nil,
-    procedure
-    begin
-      if Stack.Count >0 then begin
-        rec := Stack.peek;
-      end;
-    end);
-  Result := rec;
 end;
 
 function TQueueManager.getS: string;

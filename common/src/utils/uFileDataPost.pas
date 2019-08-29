@@ -3,7 +3,8 @@ unit uFileDataPost;
 interface
 
 uses
-  Classes, SysUtils, ExtCtrls, uCallRecordDTO, uUploadDTO, uFileStrsProcess;
+  Classes, SysUtils, ExtCtrls, uCallRecordDTO, uUploadDTO, uFileStrsProcess,
+  uQueueBase;
 
 type
   TFileDataProcess = class
@@ -16,7 +17,7 @@ type
   TFileJsonProcess = class
   private
     FTimerPost: TTimer;
-    FStrsDir: TStrings;
+    FStrsDir: TStackBase<String>;
     procedure Timer1Timer(Sender: TObject);
     function doUpload(): boolean;
   public
@@ -24,16 +25,15 @@ type
     destructor Destroy; override;
     procedure starttimer();
     procedure endtimer;
-    procedure setStrsDir(strs: TStrings);
-    property StrsDir: TStrings read FStrsDir write SetStrsDir;
+    procedure setStrsDir(strs: TStackBase<String>);
+    property StrsDir: TStackBase<String> read FStrsDir write SetStrsDir;
   end;
 
   TFileDirProcess = class
   private
     FSubDir: string;
-    FFileStrs: TFileStrsProcess;
     FJsonProcess: TFileJsonProcess;
-    FStrsDir: TStrings;
+    FStrsDir: TStackBase<String>;
     //
     FTimerUpScan: TTimer;
     procedure Timer1Timer(Sender: TObject);
@@ -65,8 +65,7 @@ end;
 constructor TFileDirProcess.Create();
 begin
   inherited;
-  FStrsDir := TStringList.Create;
-  FFileStrs := TFileStrsProcess.Create;
+  FStrsDir := TStackBase<String>.create;
   FJsonProcess := TFileJsonProcess.Create;
   //
   FTimerUpScan := TTimer.create(nil);
@@ -82,7 +81,7 @@ begin
   //
   FTimerUpScan.Enabled := false;
   FTimerUpScan.free;
-  FFileStrs.Free;
+  //FFileStrs.Free;
   //
   FStrsDir.Free;
   inherited;
@@ -98,7 +97,8 @@ procedure TFileDirProcess.add(const S: string);
 begin
   if (FTimerUpScan.Enabled) and (FStrsDir.count > 0)
       and (not s.IsEmpty()) then begin
-    FStrsDir.insert(0, S);
+    //FStrsDir.insert(0, S);
+    FStrsDir.put(S);
   end else begin
     FTimerUpScan.Interval := g_PhoneConfig.hangAftInterv * TTimeCfg.second;
     FTimerUpScan.Enabled := true;
@@ -120,7 +120,7 @@ begin
   Result := false;
   if self.FStrsDir.Count<=0 then begin
     FJsonProcess.endtimer;
-    FFileStrs.readStrs(FSubDir, FStrsDir);
+    TFileQueueProcess.readStrs(FSubDir, FStrsDir);
     if FStrsDir.Count>0 then begin
       Result := true;
       FJsonProcess.StrsDir := FStrsDir;
@@ -179,7 +179,7 @@ begin
   FTimerPost.Enabled := false;
 end;
 
-procedure TFileJsonProcess.setStrsDir(strs: TStrings);
+procedure TFileJsonProcess.setStrsDir(strs: TStackBase<String>);
 begin
   //self.FStrsDir.Assign( strs );
   self.FStrsDir := strs;
@@ -200,8 +200,9 @@ function TFileJsonProcess.doUpload(): boolean;
   begin
     if (FStrsDir.count > 0) then begin
       Result := true;
-      S := FStrsDir[0];
-      FStrsDir.Delete(0);
+      //S := FStrsDir[0];
+      //FStrsDir.Delete(0);
+      S := FStrsDir.get();
       ShowSysLog( format('get file: %s, strs(%d)', [S, FStrsDir.count]));
     end else begin
       Result := false;
