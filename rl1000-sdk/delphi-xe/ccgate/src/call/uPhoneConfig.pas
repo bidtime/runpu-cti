@@ -238,11 +238,11 @@ function TPhoneConfig.readWriteIni(const bWrite: boolean): boolean;
         iniFile.WriteString('up_data', 'url', UpDataUrl);
         iniFile.WriteInteger('up_data', 'timeOut', UpDataTimeOut);
         iniFile.WriteInteger('up_data', 'maxNum', UpDataMaxNum);
-        iniFile.WriteInteger('upload', 'hangAftInterv', hangAftInterv);
         // upload
         iniFile.WriteInteger('upload', 'connTimeOut', UpConnTimeOut);
         iniFile.WriteInteger('upload', 'upScanInterv', upScanInterv);
         iniFile.WriteInteger('upload', 'upInterv', upInterv);
+        iniFile.WriteInteger('upload', 'hangAftInterv', hangAftInterv);
         //
         iniFile.WriteInteger('removeDir', 'delRecScanInterv', delRecScanInterv);
         iniFile.WriteInteger('removeDir', 'delRecInterv', delRecInterv);
