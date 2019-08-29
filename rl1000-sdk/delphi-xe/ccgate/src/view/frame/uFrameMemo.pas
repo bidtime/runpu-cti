@@ -161,7 +161,7 @@ procedure TframeMemo.logMemo(const S: string);
   end;
 
 begin
-  memoMsg.Lines.BeginUpdate;
+  //memoMsg.Lines.BeginUpdate;
   try
     //self.memoMsg.Lines.Append(TFormatMsg.getMsgSys(S));
     //self.memoMsg.Lines.Exchange();
@@ -170,7 +170,7 @@ begin
     end;
     self.memoMsg.Lines.insert(0, getMsgSys(S));
   finally
-    memoMsg.Lines.EndUpdate;
+    //memoMsg.Lines.EndUpdate;
   end;
 end;
 

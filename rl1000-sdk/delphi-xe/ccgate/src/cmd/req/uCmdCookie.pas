@@ -14,7 +14,7 @@ type
 
 implementation
 
-uses uCmdResponse, uCmdComm, uJsonSUtils, SysUtils, uHttpUtils, uFileDataPost;
+uses uCmdResponse, uCmdComm, uJsonSUtils, SysUtils, uHttpUtils;//, uFileDataPost;
 
 { TAddCookie }
 
@@ -25,7 +25,7 @@ begin
   try
     try
       THttpUtils.addCookie(u.request.param.value);
-      g_FileDirProcess.starttimer();
+      //g_FileDirProcess.starttimer();
       Result := TCmdResponse.successJson(u.cmd);
     except
       on e: Exception do begin

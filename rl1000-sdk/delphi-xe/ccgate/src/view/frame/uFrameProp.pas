@@ -152,6 +152,8 @@ begin
   //
   createHttpSrv();
   //
+  createFrames();
+  //
   //FMyThread.Start;
   ShowSysLog('服务启动结束.');
   //

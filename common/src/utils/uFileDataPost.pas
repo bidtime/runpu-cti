@@ -13,7 +13,6 @@ type
     class function upload(const fileUrl, dataUrl, jsonFileName: string;
       const tmConn, tmRes, tmUpdate: integer): integer; static;
   end;
-
   TFileJsonProcess = class
   private
     FTimerPost: TTimer;
@@ -70,9 +69,9 @@ begin
   FJsonProcess.StrsDir := FStrsDir;
   //
   FTimerUpScan := TTimer.create(nil);
-  FTimerUpScan.Enabled := false;
-  //FTimerUpScan.Interval := g_PhoneConfig.UpScanInterv * TTimeCfg.minute;
-  FTimerUpScan.Interval := 10 * TTimeCfg.second;
+  FTimerUpScan.Enabled := true;
+  FTimerUpScan.Interval := g_PhoneConfig.UpScanInterv * TTimeCfg.minute;
+  //FTimerUpScan.Interval := 10 * TTimeCfg.second;
   FTimerUpScan.OnTimer := Timer1Timer;
 end;
 

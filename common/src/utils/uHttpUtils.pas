@@ -287,6 +287,9 @@ begin
   log4info(method + ': begin, ' + format(FMT_BEGIN, [url, method, getType()]));
   ssRst := TStringStream.Create('', encode);
   try
+    if THttpUtils.fCookie.IsEmpty then begin
+      raise THttpNoLoginException.create('cookie is empty)');
+    end;
     // add cookie
     self.CookieManager.AddServerCookie(
       //'ACCESS_TICKET="TGT-171-O42vP4LGehJ3z3VGOXPteuccJWdxBvSDTa1bUlSX1VT2miqnKM-cas.ecarpo.com"',
