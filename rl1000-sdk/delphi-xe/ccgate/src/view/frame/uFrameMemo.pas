@@ -99,14 +99,13 @@ begin
   Sleep(0);
   Application.ProcessMessages;
   json := rec.json;
-  if json.IsEmpty then begin
-    exit;
-  end;
   if (FLogMemo) and (rec.logMemo) then begin
     logMemo(json);
   end;
-  if (Assigned(self.FOnGetQueue)) then begin
-    self.FOnGetQueue(json);
+  if not json.IsEmpty then begin
+    if (Assigned(self.FOnGetQueue)) then begin
+      self.FOnGetQueue(json);
+    end;
   end;
   if rec.logD then begin
     TLogFileU.debug(json);

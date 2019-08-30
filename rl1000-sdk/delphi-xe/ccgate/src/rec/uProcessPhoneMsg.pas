@@ -131,6 +131,7 @@ begin
         or (evData.lResult = 14) and (evData.lParam=1) then begin
       if not (g_LocalCallEv.start_prefix.IsEmpty) then begin
         ShowMsg(g_LocalCallEv.testPrefix, true);
+        inherited ShowMsgQ('');
       end;
     end;
   end;
