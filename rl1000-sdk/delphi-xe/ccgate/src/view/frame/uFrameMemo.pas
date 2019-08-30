@@ -147,6 +147,8 @@ begin
             Application.ProcessMessages;
             rec := FQueueMsg.get;
             showlog(rec);
+            Sleep(0);
+            Application.ProcessMessages;
           until rec.json.IsEmpty;
         end else begin
           showlog(FQueueMsg.get);
