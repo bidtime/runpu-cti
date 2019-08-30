@@ -69,7 +69,7 @@ begin
   FJsonProcess.StrsDir := FStrsDir;
   //
   FTimerUpScan := TTimer.create(nil);
-  FTimerUpScan.Enabled := true;
+  FTimerUpScan.Enabled := false;
   FTimerUpScan.Interval := g_PhoneConfig.UpScanInterv * TTimeCfg.minute;
   //FTimerUpScan.Interval := 10 * TTimeCfg.second;
   FTimerUpScan.OnTimer := Timer1Timer;
@@ -89,7 +89,7 @@ end;
 procedure TFileDirProcess.setSubDir(const subD: string);
 begin
   FSubDir := subD;
-  //FTimerUpScan.Enabled := true;
+  FTimerUpScan.Enabled := true;
 end;
 
 procedure TFileDirProcess.add(const jsonfile: string);

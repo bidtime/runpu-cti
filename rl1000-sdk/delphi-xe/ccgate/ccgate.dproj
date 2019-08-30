@@ -173,13 +173,11 @@
         <DCCReference Include="src\utils\uFileStrsProcess.pas"/>
         <DCCReference Include="src\view\frame\uFrameMemo.pas">
             <Form>frameMemo</Form>
-            <FormType>dfm</FormType>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
         <DCCReference Include="src\view\frame\uQueueBase.pas"/>
         <DCCReference Include="src\frm\uFrmAboutBox.pas">
             <Form>FrmAboutBox</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="src\view\frame\uQueueManager.pas"/>
         <DCCReference Include="src\utils\uQueueTimer.pas"/>

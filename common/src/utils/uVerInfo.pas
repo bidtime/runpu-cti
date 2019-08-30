@@ -8,7 +8,7 @@ const
   TelInfo2 = '010-86186688';
   WebAddress = 'http://erp.yuntong.com';
   Version = 0.396;
-  Build = '2019.08.29';
+  Build = '2019.08.30';
   AppExt = '服务';
   AppName = '运通电话盒子网关(L)';
 
