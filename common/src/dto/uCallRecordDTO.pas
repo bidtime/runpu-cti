@@ -61,6 +61,8 @@ type
     callLog: string;
     ver: string;
     //
+    start_prefix: string;
+    //
     constructor create();
     destructor Destroy(); override;
     function toStrs(): string;
@@ -82,6 +84,7 @@ type
     procedure setCallUUID(const uuid: string);
     function crConnect(const n: Smallint): boolean;
     function toBaseJson(): string;
+    function testPrefix(): string;
     //
     property resFileName: string read getUUIDFileRes;
     property jsonFileName: string read getUUIDFileJson;
@@ -96,6 +99,7 @@ constructor TCallRecordDTO.create;
 begin
   inherited;
   resetVal;
+  start_prefix := '--------------------------';
 end;
 
 procedure TCallRecordDTO.resetStartTime();
@@ -143,6 +147,7 @@ begin
   //
   callLog := '';
   upLog := '';
+  //
   ver := getVerInfo;
 end;
 
@@ -397,6 +402,16 @@ begin
   fileName := '';
   fileSize := 0;
 end;}
+
+function TCallRecordDTO.testPrefix: string;
+begin
+  if not self.start_prefix.IsEmpty then begin
+    Result := start_prefix;
+    start_prefix := '';
+  end else begin
+    Result := '';
+  end;
+end;
 
 function TCallRecordDTO.getUpSta: string;
 var S: string;

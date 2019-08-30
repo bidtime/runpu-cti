@@ -131,7 +131,10 @@ begin
     g_LocalCallEv.callLog := '去电开始';
     g_LocalCallEv.saveToUUIDFile;
     //
-    ShowMsg('--------------------------', true);
+    //ShowMsg('--------------------------', true);
+    if not (g_LocalCallEv.start_prefix.IsEmpty) then begin
+      ShowMsg(g_LocalCallEv.testPrefix, true);
+    end;
     ShowMsg(format('接收到去电命令: %s, %s', [uuid, phoneNo]), true);
     //tryStartDialup(self.PhoneConfig.OutPrefix + prefix + phoneNo);
     tryStartDialup(prefix + phoneNo);

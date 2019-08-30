@@ -93,8 +93,9 @@ begin
 //  FMyThread := TMyThread.create(50);
 //  FMyThread.FuncSendEvent := self.DoSendMsg;
   self.frameMemoQueue.OnGetQueue := DoSendQueue;
-  self.frameMemoQueue.setInterval(100);
-  self.frameMemoQueue.Logd := false;
+  //self.frameMemoQueue.setInterval(250);
+  self.frameMemoQueue.Logd := true;
+  self.frameMemoQueue.AtOnce := true;
   //self.frameMemoLog.Logd := false;
   self.frameMemoLogD.Logd := true;
 end;

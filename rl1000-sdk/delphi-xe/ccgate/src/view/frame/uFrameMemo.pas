@@ -19,6 +19,7 @@ type
     FLogMaxLines: integer;
     FSleep: boolean;
     FOnGetQueue: TGetStrProc;
+    FAtOnce: boolean;
     procedure MyTimer(Sender: TObject);
     procedure showlog(const rec: TJRec);
     procedure logMemo(const S: string);
@@ -38,6 +39,7 @@ type
     property Log: boolean read FLog write FLog;
     property LogMaxLines: integer read FLogMaxLines write FLogMaxLines;
     property OnGetQueue: TGetStrProc read FOnGetQueue write FOnGetQueue;
+    property AtOnce: boolean read FAtOnce write FAtOnce;
   end;
 
 implementation
@@ -66,6 +68,7 @@ end;
 constructor TframeMemo.Create(AOwner: TComponent);
 begin
   inherited;
+  FAtOnce := false;
   FLogMaxLines := 200;
   memoMsg.Clear;
   FQueueMsg := TQueueManager.create;
@@ -93,6 +96,7 @@ end;
 procedure TframeMemo.showlog(const rec: TJRec);
 var json: string;
 begin
+  Sleep(0);
   Application.ProcessMessages;
   json := rec.json;
   if json.IsEmpty then begin
@@ -110,6 +114,7 @@ begin
   if rec.log then begin
     log4debug(json);
   end;
+  Sleep(0);
   Application.ProcessMessages;
 end;
 
@@ -135,8 +140,18 @@ begin
     //TTask.run(procedure begin
       TThread.Synchronize(nil,
       procedure
+      var rec: TJRec;
       begin
-        showlog(FQueueMsg.get);
+        if FAtOnce then begin
+          repeat
+            Sleep(0);
+            Application.ProcessMessages;
+            rec := FQueueMsg.get;
+            showlog(rec);
+          until rec.json.IsEmpty;
+        end else begin
+          showlog(FQueueMsg.get);
+        end;
       end);
     //end);
     Sleep(0);

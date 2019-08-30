@@ -126,16 +126,18 @@ var
   json, S: string;
 begin
   uChnId := evData.uChnId;
-  if (evData.lEventType=BriEvent_SystemOther)
-      and (evData.lResult = 12) and (evData.lParam=0) then begin
+  if (evData.lEventType=BriEvent_SystemOther) then begin
+    if ((evData.lResult = 12) and (evData.lParam=0))
+        or (evData.lResult = 14) and (evData.lParam=1) then begin
+      if not (g_LocalCallEv.start_prefix.IsEmpty) then begin
+        ShowMsg(g_LocalCallEv.testPrefix, true);
+      end;
+    end;
   end;
   ShowMsgStateQ(uChnId, TChannelCmd.fmtEvent(evData, g_LocalCallEv.callType,
     g_LocalCallEv.callResult, g_LocalCallEv.callUuid), true);
   case evData.lEventType of
     BriEvent_PhoneHook: begin            // 本地摘机
-      if not (g_LocalCallEv.validUUID) then begin
-        ShowMsg('--------------------------', true);
-      end;
       if CPC_General(uChnId, CPC_GENERAL_ISSTARTDIAL, 0, NULL) = 0 then begin
         CPC_SetDevCtrl(uChnId, CPC_CTRL_DOHOOK, 0);
         S := '本地话机摘机，自动软挂机，禁止带耳麦的设备进行三方通话';
@@ -175,6 +177,7 @@ begin
         self.FQueueTimer.put(json);
       end;
       g_LocalCallEv.resetVal;
+      g_LocalCallEv.start_prefix := '--------------------------';
       // resetCall
       //TCallLogCmd.resetCall(uChnId);
       //ShowMsgLogQ(uChnId, '重置通话日志.');
