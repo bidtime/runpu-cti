@@ -11,7 +11,7 @@ type
     { Private declarations }
     FTimer1: TTimer;
     FOnGetQueue: TGetStrProc;
-    procedure MyTimer(Sender: TObject);
+    procedure OnMyTimer(Sender: TObject);
   public
     { Public declarations }
     constructor Create; overload;
@@ -31,7 +31,7 @@ begin
   inherited;
   FTimer1 := TTimer.Create(nil);
   FTimer1.Interval := 1000;
-  FTimer1.OnTimer := MyTimer;
+  FTimer1.OnTimer := OnMyTimer;
   FTimer1.Enabled := true;
 end;
 
@@ -40,7 +40,7 @@ begin
   inherited;
 end;
 
-procedure TQueueStrTimer.MyTimer(Sender: TObject);
+procedure TQueueStrTimer.OnMyTimer(Sender: TObject);
 begin
   TTimer(Sender).Enabled := false;
   try

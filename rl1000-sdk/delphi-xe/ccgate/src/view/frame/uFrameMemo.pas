@@ -20,7 +20,7 @@ type
     FSleep: boolean;
     FOnGetQueue: TGetStrProc;
     FAtOnce: boolean;
-    procedure MyTimer(Sender: TObject);
+    procedure OnMyTimer(Sender: TObject);
     procedure showlog(const rec: TJRec);
     procedure logMemo(const S: string);
   public
@@ -48,7 +48,7 @@ uses uLog4me, uLogFileU, System.Threading;
 
 {$R *.dfm}
 
-{ TFrame2 }
+{ TframeMemo }
 
 procedure TframeMemo.add(const json: string; const bMemo: boolean);
 begin
@@ -74,7 +74,7 @@ begin
   FQueueMsg := TQueueManager.create;
   FTimer1 := TTimer.Create(nil);
   FTimer1.Interval := 250;
-  FTimer1.OnTimer := MyTimer;
+  FTimer1.OnTimer := OnMyTimer;
   FTimer1.Enabled := true;
   FLogMemo := true;
   FLogd := false;
@@ -127,7 +127,7 @@ begin
   FSleep := true;
 end;
 
-procedure TframeMemo.MyTimer(Sender: TObject);
+procedure TframeMemo.OnMyTimer(Sender: TObject);
 begin
   if FSleep then begin
     exit;
@@ -155,9 +155,9 @@ begin
         end;
       end);
     //end);
+  finally
     Sleep(0);
     Application.ProcessMessages;
-  finally
     TTimer(Sender).Enabled := true;
   end;
 end;

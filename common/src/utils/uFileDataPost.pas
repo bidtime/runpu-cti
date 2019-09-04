@@ -143,9 +143,9 @@ begin
         doReadStrs();
       end);
     //end);
+  finally
     Sleep(0);
     Application.ProcessMessages;
-  finally
     TTimer(Sender).Enabled := true;
     FTimerUpScan.Tag := 0;
   end;
@@ -256,9 +256,9 @@ begin
         exit;
       end);
     //end);
+  finally
     Sleep(0);
     Application.ProcessMessages;
-  finally
     TTimer(Sender).Enabled := bOK;
     TTimer(Sender).tag := 0;
   end;

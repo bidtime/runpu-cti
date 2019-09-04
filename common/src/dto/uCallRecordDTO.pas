@@ -66,7 +66,7 @@ type
     constructor create();
     destructor Destroy(); override;
     function toStrs(): string;
-    procedure resetVal();
+    procedure resetVal(const bPrefix: boolean);
     //procedure getTestInfo();
     function toJson: string; virtual;
     function toJsonV(const fm: TJsonFormatting=TJsonFormatting.None): string;
@@ -98,8 +98,7 @@ uses Classes, SysUtils, uFileRecUtils, uJsonFUtils, uDateTimeUtils, uRecInf,
 constructor TCallRecordDTO.create;
 begin
   inherited;
-  resetVal;
-  start_prefix := '--------------------------';
+  resetVal(true);
 end;
 
 procedure TCallRecordDTO.resetStartTime();
@@ -115,7 +114,7 @@ begin
   totalSeconds := 0;
 end;
 
-procedure TCallRecordDTO.resetVal();
+procedure TCallRecordDTO.resetVal(const bPrefix: boolean);
 begin
   callUuid := '';
   resetStartTime();
@@ -147,6 +146,9 @@ begin
   //
   callLog := '';
   upLog := '';
+  if bPrefix then begin
+    start_prefix := '--------------------------';
+  end;
   //
   ver := getVerInfo;
 end;

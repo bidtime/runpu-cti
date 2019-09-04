@@ -123,7 +123,7 @@ begin
 //      raise Exception.Create('电话处理中，稍候再拨');
 //    end;
     // StartDial set new val.
-    g_LocalCallEv.resetVal;
+    g_LocalCallEv.resetVal(false);
     //g_LocalCallEv.setCallType( CALLT_CALLOUT );
     g_LocalCallEv.callUuid := uuid;
     g_LocalCallEv.FromPhone := g_phoneConfig.callingNo;

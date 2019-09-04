@@ -25,7 +25,7 @@ type
     procedure ShowMsgStateQ(const uChnId: BRIINT32; const msg: String;
       const attachLog: boolean=false);
     procedure doMsgA(const lPar: LPARAM);
-    procedure processJson(const json: string);
+    procedure OnProcessJson(const json: string);
   public
     { Public declarations }
     constructor Create();
@@ -45,7 +45,7 @@ begin
   inherited create;
   FLog := true;
   FQueueTimer := TQueueStrTimer.Create;
-  FQueueTimer.OnGetQueue := processJson;
+  FQueueTimer.OnGetQueue := OnProcessJson;
   //
   FQueueTimer.setInterv(g_PhoneConfig.hangAftInterv * TTimeCfg.second);
 end;
@@ -82,7 +82,7 @@ begin
   end);
 end;
 
-procedure TProcessPhoneMsg.processJson(const json: string);
+procedure TProcessPhoneMsg.OnProcessJson(const json: string);
 begin
   TLocalRemoteCallEV.upload(json);
 end;
@@ -177,8 +177,7 @@ begin
       if g_LocalCallEv.validUUID then begin
         self.FQueueTimer.put(json);
       end;
-      g_LocalCallEv.resetVal;
-      g_LocalCallEv.start_prefix := '--------------------------';
+      g_LocalCallEv.resetVal(true);
       // resetCall
       //TCallLogCmd.resetCall(uChnId);
       //ShowMsgLogQ(uChnId, '重置通话日志.');
@@ -208,7 +207,7 @@ begin
           // start CALLT_CALLIN
           ShowMsg('--------------------------', true);
           ShowMsgLogQ(uChnId, 'CallIn reset g_LocalCallEv.');
-          g_LocalCallEv.resetVal;
+          g_LocalCallEv.resetVal(false);
           g_LocalCallEv.callUuid := newUUID(false);
           g_LocalCallEv.setCallType( CALLT_CALLIN );
           g_LocalCallEv.FromPhone := '00000001';
