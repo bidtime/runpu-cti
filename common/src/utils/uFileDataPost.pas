@@ -117,11 +117,17 @@ end;
 procedure TFileDirProcess.doReadStrs();
 begin
   if self.FStrsDir.Count<=0 then begin
+    ShowSysLog('doReadStrs: size is none');
     FJsonProcess.endtimer;
     TFileQueueProcess.readStrs(FSubDir, FStrsDir);
     if FStrsDir.Count>0 then begin
+      ShowSysLog( format('doReadStrs: size is %d, start json timer', [FStrsDir.count]));
       FJsonProcess.starttimer;
+    end else begin
+      ShowSysLog( 'doReadStrs: size is none, don''t start json timer');
     end;
+  end else begin
+    ShowSysLog( format('doReadStrs: size is %d', [FStrsDir.count]));
   end;
 end;
 

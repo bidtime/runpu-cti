@@ -138,7 +138,7 @@ procedure TFrameProp.CreateServer(const lFrmHandle: longint);
   end;
 
 begin
-  ShowSysLog('服务开始启动...');
+  ShowSysLog('frameprop begin...');
   //
   g_ShowMsgBase.OnShowLogs := OnShowSysLog;
   //
@@ -149,16 +149,22 @@ begin
   FCmdParser := TCmdParser.Create();
   FCmdParser.OnShowLogs := OnShowSysLog;
   //
+  ShowSysLog('create device begin...');
   createDevice();
+  ShowSysLog('create device end.');
   //
+  ShowSysLog('create http server begin...');
   createHttpSrv();
+  ShowSysLog('create http server end.');
   //
+  ShowSysLog('create frames begin...');
   createFrames();
+  ShowSysLog('create frames end.');
   //
   //FMyThread.Start;
-  ShowSysLog('服务启动结束.');
   //
   g_FileDirProcess.setSubDir(TFileRecUtils.getDirOfRec(TRecInf.CALL));
+  ShowSysLog('frameprop end.');
 end;
 
 destructor TFrameProp.Destroy;
